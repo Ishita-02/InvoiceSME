@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import lighthouse from '@lighthouse-web3/sdk'
 
 
@@ -25,6 +25,30 @@ export default function CreateInvoiceForm() {
     const [country, setCountry] = useState('India'); // ADDED: State for country
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [countries, setCountries] = useState([]);
+
+    useEffect(() => {
+        const fetchCountries = async () => {
+        try {
+            const res = await fetch("https://api.first.org/data/v1/countries");
+            const json = await res.json();
+
+            const countryList = Object.entries(json.data).map(([code, info]) => ({
+            code,
+            name: info.country,
+            region: info.region,
+            }));
+
+            countryList.sort((a, b) => a.name.localeCompare(b.name));
+
+            setCountries(countryList);
+        } catch (error) {
+            console.error("Failed to fetch countries:", error);
+        }
+        };
+
+        fetchCountries();
+    }, []);
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -106,14 +130,18 @@ export default function CreateInvoiceForm() {
                         <label htmlFor="country" className="block text-sm font-medium text-gray-700 font-sans">
                             Country
                         </label>
-                        <select
+                         <select
                             id="country"
                             value={country}
                             onChange={(e) => setCountry(e.target.value)}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-[#1E4D43] focus:border-[#1E4D43] text-gray-900" // ADDED text color
-                        >
-                            <option>India</option>
-                            {/* You can add other countries if needed */}
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-[#1E4D43] focus:border-[#1E4D43] text-gray-900"
+                            >
+                            <option value="">Select a country</option>
+                            {countries.map((c) => (
+                                <option key={c.code} value={c.name}>
+                                {c.name} ({c.code})
+                                </option>
+                            ))}
                         </select>
                     </div>
                      <div>

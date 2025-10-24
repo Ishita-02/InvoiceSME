@@ -4,8 +4,6 @@ import os
 from datetime import datetime
 from web3 import Web3
 
-# --- Action Required: Add your Sepolia RPC URL here ---
-# You can get one for free from https://www.alchemy.com or https://www.infura.io
 SEPOLIA_RPC_URL = "https://eth-sepolia.g.alchemy.com/v2/AqK-lMhLej1xV4uOTUDOKt724_JJsrwb"
 w3 = Web3(Web3.HTTPProvider(SEPOLIA_RPC_URL))
 
@@ -22,13 +20,13 @@ DEFI_CONTRACTS = {
 # --- Helper Functions for Data Fetching ---
 
 def get_transaction_data(address: str):
-    url = f"https://api-sepolia.etherscan.io/api?module=account&action=txlist&address={address}&sort=asc&apikey={ETHERSCAN_API_KEY}"
+    url = f"https://api.etherscan.io/v2/api?chainid=11155111&module=account&action=txlist&address={address}&sort=asc&apikey={ETHERSCAN_API_KEY}"
     res = requests.get(url)
     data = res.json().get("result", [])
     return data
 
 def get_wallet_balance(address: str) -> float:
-    url = f"https://api-sepolia.etherscan.io/api?module=account&action=balance&address={address}&tag=latest&apikey={ETHERSCAN_API_KEY}"
+    url = f"https://api.etherscan.io/v2/api?chainid=11155111&module=account&action=balance&address={address}&tag=latest&apikey={ETHERSCAN_API_KEY}"
     res = requests.get(url)
     balance = float(res.json().get("result", 0)) / 1e18
     return balance
