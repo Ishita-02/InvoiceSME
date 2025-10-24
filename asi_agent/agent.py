@@ -4,8 +4,6 @@ from uagents.network import add_testnet_funds
 from protocols.risk_protocol import risk_protocol, RiskRequest, RiskResponse
 from utils.risk_model import calculate_risk_score
 
-# identity = Identity.from_seed("risk_agent_seed_phrase_123", 1)
-
 agent = Agent(
     name="risk_score_agent",
     port=8001,
@@ -15,11 +13,14 @@ agent = Agent(
 
 @agent.on_rest_post("/risk/check", RiskRequest, RiskResponse)
 async def handle_risk_post(ctx: Context, req: RiskRequest) -> RiskResponse:
-    ctx.logger.info(f"Received risk check for: {req.wallet_address}")
-    risk = calculate_risk_score(req.wallet_address)
+    ctx.logger.info(f"Received risk check for: {req}")
+    riskRes: RiskResponse = calculate_risk_score(req.wallet_address, req.country, float(req.amount), req.industry, int(req.days))
+    print("res", riskRes)
     return RiskResponse(
-        risk_score=risk,
-        message=f"Risk score for {req.wallet_address}: {risk:.2f}"
+        risk_score=riskRes["risk_score"],
+        risk_level=riskRes["risk_level"],
+        wallet_address=riskRes["wallet_address"],
+        details=riskRes["details"]
     )
 
 
