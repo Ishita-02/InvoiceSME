@@ -2,30 +2,44 @@
 
 import { useState, useEffect } from 'react';
 import lighthouse from '@lighthouse-web3/sdk'
+import web3Service from '../app/components/services/Web3Service.jsx';
 
 
-// Added a list of industries for the dropdown
 const industryOptions = [
-    "IT Services & Consulting",
-    "Manufacturing",
-    "Textiles & Apparel",
-    "Pharmaceuticals",
-    "Automotive",
-    "FMCG (Fast-Moving Consumer Goods)",
-    "Logistics & Supply Chain",
-    "Other"
+  "Technology",
+  "Healthcare",
+  "Finance",
+  "Insurance",
+  "Manufacturing",
+  "Retail",
+  "E-commerce",
+  "Government",
+  "Education",
+  "Telecommunications",
+  "Real Estate",
+  "Construction",
+  "Hospitality",
+  "Transportation",
+  "Energy",
+  "Agriculture",
+  "Entertainment",
+  "Fashion",
+  "Cryptocurrency"
 ];
+
 
 export default function CreateInvoiceForm() {
     const [faceValue, setFaceValue] = useState('');
     const [discountValue, setDiscountValue] = useState('');
     const [dueDate, setDueDate] = useState('');
-    const [invoiceFile, setInvoiceFile] = useState(null); // ADDED: State for file object
-    const [industry, setIndustry] = useState(''); // ADDED: State for industry
-    const [country, setCountry] = useState('India'); // ADDED: State for country
+    const [invoiceFile, setInvoiceFile] = useState(null); 
+    const [industry, setIndustry] = useState(''); 
+    const [country, setCountry] = useState('India'); 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [countries, setCountries] = useState([]);
+    const [walletAddress, setWalletAddress] = useState('');
+
 
     useEffect(() => {
         const fetchCountries = async () => {
@@ -48,7 +62,20 @@ export default function CreateInvoiceForm() {
         };
 
         fetchCountries();
+        checkWalletConnection();
     }, []);
+
+    const checkWalletConnection = async () => {
+        try {
+            const isConnected = await web3Service.isConnected();
+            if (isConnected) {
+                const account = web3Service.getAccount();
+                setWalletAddress(account);
+            }
+        } catch (error) {
+            console.error("Error checking wallet connection:", error);
+        }
+    };
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -61,29 +88,177 @@ export default function CreateInvoiceForm() {
         }
     };
 
+    const convertDateToDDMMYYYY = (dateString) => {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    };
+
+    const uploadToLighthouse = async (file) => {
+        try {
+            setCurrentStep('Uploading invoice to Lighthouse...');
+            
+            // Upload file to Lighthouse
+            const output = await lighthouse.upload([file], process.env.NEXT_LIGHTHOUSE_API_KEY);
+            
+            if (!output || !output.data || !output.data.Hash) {
+                throw new Error('Failed to get IPFS hash from Lighthouse');
+            }
+
+            const ipfsHash = output.data.Hash;
+            const ipfsUri = `ipfs://${ipfsHash}`;
+            
+            console.log('File uploaded to Lighthouse:', ipfsUri);
+            return ipfsUri;
+        } catch (error) {
+            console.error('Lighthouse upload error:', error);
+            throw new Error(`Failed to upload to Lighthouse: ${error.message}`);
+        }
+    };
+
+    const calculateRiskScore = async () => {
+        try {
+            setCurrentStep('Calculating risk score...');
+            
+            const formattedDate = convertDateToDDMMYYYY(dueDate);
+            
+            const response = await fetch('/api/risk/check', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    wallet: walletAddress,
+                    country: country,
+                    amount: parseFloat(faceValue),
+                    industry: industry,
+                    date: formattedDate
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to calculate risk score');
+            }
+
+            const data = await response.json();
+            console.log('Risk score calculated:', data);
+            
+            return {
+                riskScore: data.risk_score,
+                riskLevel: data.risk_level,
+                message: data.message
+            };
+        } catch (error) {
+            console.error('Risk calculation error:', error);
+            throw new Error(`Failed to calculate risk score: ${error.message}`);
+        }
+    };
+
+    const createInvoiceOnChain = async (tokenURI, riskScore) => {
+        try {
+            setCurrentStep('Creating invoice on blockchain...');
+            
+            // Convert date to Unix timestamp
+            const dueDateTimestamp = web3Service.dateToTimestamp(dueDate);
+            
+            // Create invoice on smart contract
+            const result = await web3Service.createInvoice(
+                tokenURI,
+                faceValue,
+                discountValue,
+                dueDateTimestamp
+            );
+            
+            console.log('Invoice created on-chain:', result);
+            
+            // Process verification result (submit risk score)
+            if (result.tokenId) {
+                setCurrentStep('Submitting risk score...');
+                await web3Service.processVerificationResult(
+                    result.tokenId,
+                    Math.round(riskScore)
+                );
+            }
+            
+            return result;
+        } catch (error) {
+            console.error('Blockchain error:', error);
+            throw new Error(`Failed to create invoice on blockchain: ${error.message}`);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setSuccess('');
         setIsLoading(true);
+        setCurrentStep('');
 
-        // TODO:
-        // 1. Upload the `invoiceFile` to Lighthouse/IPFS to get the tokenURI.
-        // 2. Pass the form data (including industry, country) to your backend.
-        // 3. Your backend calculates the risk score.
-        // 4. Your backend calls the `createInvoice` function on the smart contract.
-        console.log({
-            faceValue,
-            discountValue,
-            dueDate,
-            invoiceFile: invoiceFile?.name,
-            industry,
-            country
-        });
+        try {
+            // Validation
+            if (!walletAddress) {
+                throw new Error('Please connect your wallet first');
+            }
 
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Mock network delay
+            if (!invoiceFile) {
+                throw new Error('Please upload an invoice PDF');
+            }
 
-        setIsLoading(false);
-        // Reset form or show success message
+            if (parseFloat(discountValue) >= parseFloat(faceValue)) {
+                throw new Error('Funding amount must be less than face value');
+            }
+
+            // Check if wallet is initialized
+            const isConnected = await web3Service.isConnected();
+            if (!isConnected) {
+                await web3Service.connectWallet();
+                const account = web3Service.getAccount();
+                setWalletAddress(account);
+            }
+
+            // Check if seller is verified
+            setCurrentStep('Checking seller verification...');
+            const isVerified = await web3Service.isVerifiedSeller();
+            if (!isVerified) {
+                throw new Error('Your wallet is not verified as a seller. Please contact admin.');
+            }
+
+            // Step 1: Calculate Risk Score
+            const riskData = await calculateRiskScore();
+            
+            // Step 2: Upload to Lighthouse
+            const tokenURI = await uploadToLighthouse(invoiceFile);
+            
+            // Step 3: Create Invoice on Blockchain
+            const invoiceResult = await createInvoiceOnChain(tokenURI, riskData.riskScore);
+            
+            // Success!
+            setSuccess(
+                `✅ Invoice created successfully!\nTransaction: ${invoiceResult.transactionHash}\nToken ID: ${invoiceResult.tokenId}\nRisk Score: ${riskData.riskScore} (${riskData.riskLevel})\n${riskData.riskScore <= 40 ? 'Your invoice has been automatically listed!' : 'Your invoice needs manual review.'}`
+            );
+            
+            // Reset form
+            setFaceValue('');
+            setDiscountValue('');
+            setDueDate('');
+            setInvoiceFile(null);
+            setIndustry('');
+            setCountry('India');
+            
+            // Clear file input
+            const fileInput = document.getElementById('invoiceFile');
+            if (fileInput) fileInput.value = '';
+
+        } catch (err) {
+            console.error('Error in form submission:', err);
+            setError(err.message || 'An error occurred while creating the invoice');
+        } finally {
+            setIsLoading(false);
+            setCurrentStep('');
+        }
     };
 
     return (

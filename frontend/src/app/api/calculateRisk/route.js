@@ -70,7 +70,6 @@ export async function POST(req) {
 
     const { risk_score, message } = response.data;
 
-    // --- Return JSON Response ---
     return NextResponse.json(
       {
         wallet,

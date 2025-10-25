@@ -36,7 +36,7 @@ INDUSTRY_RISK = {
     "Real Estate": 18, "Construction": 22, "Hospitality": 25,
     "Transportation": 15, "Energy": 12, "Agriculture": 20,
     "Entertainment": 28, "Fashion": 23, "Cryptocurrency": 35,
-    "DEFAULT": 20  # Unknown industries get moderate risk
+    "DEFAULT": 20  
 }
 
 # --- Helper Functions for Data Fetching ---
