@@ -30,15 +30,15 @@ const useMockAuth = () => {
 
 // Simple Tabs component
 const Tabs = ({ activeTab, setActiveTab }) => (
-    <div className="border-b border-gray-200 mb-8">
-        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+    <div className="border-b border-gray-300 mb-8 bg-white sticky top-0 z-20">
+        <nav className="-mb-px flex space-x-8 justify-center" aria-label="Tabs">
             <button
                 onClick={() => setActiveTab('marketplace')}
                 className={`${
                     activeTab === 'marketplace'
                         ? 'border-[#1E4D43] text-[#1E4D43]'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-bold font-sans text-sm`}
+                } whitespace-nowrap py-4 px-3 border-b-2 font-bold font-sans text-sm transition-all`}
             >
                 Marketplace
             </button>
@@ -48,7 +48,7 @@ const Tabs = ({ activeTab, setActiveTab }) => (
                     activeTab === 'create'
                         ? 'border-[#1E4D43] text-[#1E4D43]'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-bold font-sans text-sm`}
+                } whitespace-nowrap py-4 px-3 border-b-2 font-bold font-sans text-sm transition-all`}
             >
                 Create Invoice
             </button>
@@ -65,31 +65,43 @@ export default function DashboardPage() {
     const [activeTab, setActiveTab] = useState('marketplace');
 
     if (!ready) {
-        return <div className="flex items-center justify-center h-screen font-sans">Loading App...</div>;
+        return (
+            <div className="flex items-center justify-center h-screen font-sans text-gray-800 bg-[#F9F9F7]">
+                Loading App...
+            </div>
+        );
     }
 
     return (
-        <div className="min-h-screen bg-[#F9F9F7]">
+        <div className="min-h-screen bg-[#F9F9F7] text-gray-800 overflow-x-hidden">
             <Header />
-            <main className="container mx-auto p-6">
+            <main className="container mx-auto p-6 mt-6">
                 {!authenticated ? (
-                    <div className="text-center mt-20">
-                        <h1 className="text-3xl font-bold font-sans">Welcome to the Marketplace</h1>
-                        <p className="text-gray-600 mt-2">Please connect your wallet to get started.</p>
+                    <div className="text-center mt-24">
+                        <h1 className="text-3xl font-bold font-sans text-[#1E4D43]">
+                            Welcome to the Marketplace
+                        </h1>
+                        <p className="text-gray-600 mt-2">
+                            Please connect your wallet to get started.
+                        </p>
                     </div>
                 ) : (
                     <div>
                         {!isHumanVerified ? (
-                             <HumanVerification onVerificationComplete={() => setIsHumanVerified(true)} />
+                            <div className="mt-10">
+                                <HumanVerification onVerificationComplete={() => setIsHumanVerified(true)} />
+                            </div>
                         ) 
                         // : !isBusinessVerified ? (
                         //     <BusinessVerification onVerificationComplete={() => setIsBusinessVerified(true)} />
                         // ) 
                         : (
-                            <div>
+                            <div className="mt-10">
                                 <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
-                                {activeTab === 'marketplace' && <Marketplace />}
-                                {activeTab === 'create' && <CreateInvoiceForm />}
+                                <div className="mt-8">
+                                    {activeTab === 'marketplace' && <Marketplace />}
+                                    {activeTab === 'create' && <CreateInvoiceForm />}
+                                </div>
                             </div>
                         )}
                     </div>
@@ -98,4 +110,3 @@ export default function DashboardPage() {
         </div>
     );
 }
-
