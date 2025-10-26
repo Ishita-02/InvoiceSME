@@ -1,37 +1,36 @@
-'use client';
+"use client";
 
-// Mock data for invoices. In a real app, this would be fetched from the smart contract.
-const mockInvoices = [
-    { id: 1, seller: '0xabc...def', faceValue: 50000, discountValue: 48000, dueDate: '2025-12-01', riskScore: 25, status: 'Listed' },
-    { id: 2, seller: '0x123...456', faceValue: 120000, discountValue: 115000, dueDate: '2026-01-15', riskScore: 15, status: 'Listed' },
-    { id: 3, seller: '0x789...ghi', faceValue: 75000, discountValue: 72000, dueDate: '2025-11-20', riskScore: 38, status: 'Listed' },
-];
+import { useState, useEffect } from "react";
+import { useWeb3 } from '../app/context/Web3Provider'
+import web3Service from '../app/components/services/Web3Service.jsx';
 
 const InvoiceCard = ({ invoice }) => {
-    const fundingProgress = (Math.random() * 80 + 10).toFixed(2); // Mock funding progress
+    const fundingProgress = (Math.random() * 80 + 10).toFixed(2); 
 
     return (
         <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-start">
-                <div>
+            <div className="flex justify-between items-start gap-4">
+                <div className="flex-grow">
                     <h3 className="font-bold text-lg font-sans text-[#1E4D43]">Invoice #{invoice.id}</h3>
-                    <p className="text-xs text-gray-500 mt-1">Seller: {invoice.seller.slice(0, 10)}...</p>
+                    {/* Full seller address with word break */}
+                    <p className="text-xs text-gray-500 mt-1 break-all">Seller: {invoice.seller}</p>
                 </div>
-                <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{invoice.status}</span>
+                {/* Status badge that won't shrink */}
+                <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full flex-shrink-0">{invoice.status}</span>
             </div>
 
-            <div className="mt-6 space-y-4">
+            <div className="mt-6s space-y-4">
                 <div className="flex justify-between">
                     <span className="text-gray-600">Funding Goal</span>
-                    <span className="font-bold font-sans">₹{invoice.discountValue.toLocaleString()}</span>
+                    <span className="font-bold font-sans">{invoice.discountValue} PYUSD</span>
                 </div>
                  <div className="flex justify-between">
                     <span className="text-gray-600">Repayment Amount</span>
-                    <span className="font-bold font-sans">₹{invoice.faceValue.toLocaleString()}</span>
+                    <span className="font-bold font-sans">{invoice.faceValue} PYUSD</span>
                 </div>
                 <div className="flex justify-between">
                     <span className="text-gray-600">Due Date</span>
-                    <span className="font-sans">{new Date(invoice.dueDate).toLocaleDateString()}</span>
+                    <span className="font-sans">{new Date(Number(invoice.dueDate) * 1000).toLocaleDateString()}</span>
                 </div>
             </div>
 
@@ -50,17 +49,45 @@ const InvoiceCard = ({ invoice }) => {
 };
 
 
-export default function Marketplace() {
-    return (
-        <div>
-            <h2 className="text-3xl font-bold font-sans">Marketplace</h2>
-            <p className="text-gray-600 mt-2">Invest in verified invoices and earn a stable yield.</p>
+const Marketplace = () => {
+  const { account, isLoading } = useWeb3();
+  const [invoices, setInvoices] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-                {mockInvoices.map(invoice => (
-                    <InvoiceCard key={invoice.id} invoice={invoice} />
-                ))}
-            </div>
-        </div>
-    );
-}
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      if (account) {
+        try {
+          const allInvoices = await web3Service.getAllInvoices(); 
+          console.log("invoices", allInvoices);
+          setInvoices(allInvoices);
+        } catch (error) {
+          console.error("Error fetching invoices:", error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    };
+
+    fetchInvoices();
+  }, [account]);
+
+  if (isLoading || loading) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Marketplace</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+        {invoices.map((invoice) => (
+          <InvoiceCard key={invoice.id} invoice={invoice} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default Marketplace;
