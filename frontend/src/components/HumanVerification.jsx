@@ -27,11 +27,16 @@ export default function HumanVerification({ onVerificationComplete }) {
             });
 
             const data = await response.json();
+            console.log("data", data)
             
             if (response.ok && data.success) {
                 console.log("✅ Backend verification successful");
                 onVerificationComplete();
-            } else {
+            } else if(data.detail == "This person has already verified for this action.") {
+                console.log("✅ Backend verification successful");
+                onVerificationComplete();
+            }
+            else {
                 console.error("❌ Backend verification failed:", data);
                 setError(data.detail || 'Verification failed. Please try again.');
             }

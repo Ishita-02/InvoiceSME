@@ -12,14 +12,14 @@ class Web3Service {
     this.contractABI = InvoiceSMEABI;
     this.tokenABI = tokenABI;
     
-    this.contractAddress = "0x12583d3247F6bF5DF70c82bF728765A336dc1006";
-    this.tokenAddress = "0xCaC524BcA292aaade2DF8A05cC58F0a65B1B3bB9"
+    this.contractAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
+    this.tokenAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
   }
 
   
   async init() {
     if (typeof window.ethereum !== 'undefined') {
-      this.web3 = new Web3("https://ethereum-sepolia-rpc.publicnode.com"); 
+      this.web3 = new Web3("http://127.0.0.1:8545/"); 
       
       try {
         await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -52,7 +52,7 @@ class Web3Service {
       throw new Error("No Ethereum provider found. Please install MetaMask.");
     }
     
-    this.web3 = new Web3(window.ethereum);
+    this.web3 = new Web3("http://127.0.0.1:8545/");
     
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     if (accounts.length === 0) {
@@ -165,6 +165,7 @@ class Web3Service {
     }
 
     const targetAddress = sellerAddress || this.account;
+    console.log("address", this.account)
     if (!targetAddress) {
       throw new Error("No address provided and no account connected.");
     }
@@ -173,6 +174,7 @@ class Web3Service {
       const isVerified = await this.contract.methods
         .verifiedSellers(targetAddress)
         .call();
+    console.log("seller", isVerified)
       return isVerified;
     } catch (error) {
       console.error("Error checking seller verification:", error);

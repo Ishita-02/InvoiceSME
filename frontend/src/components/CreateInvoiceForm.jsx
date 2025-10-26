@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import lighthouse from '@lighthouse-web3/sdk'
 import web3Service from '../app/components/services/Web3Service.jsx';
 
 
@@ -26,7 +25,6 @@ const industryOptions = [
   "Fashion"
 ];
 
-
 export default function CreateInvoiceForm() {
     const [faceValue, setFaceValue] = useState('');
     const [discountValue, setDiscountValue] = useState('');
@@ -38,6 +36,7 @@ export default function CreateInvoiceForm() {
     const [error, setError] = useState('');
     const [countries, setCountries] = useState([]);
     const [walletAddress, setWalletAddress] = useState('');
+    const [currentStep, setCurrentStep] = useState('');
     const [success, setSuccess] = useState(false);
 
     useEffect(() => {
@@ -87,43 +86,28 @@ export default function CreateInvoiceForm() {
         }
     };
 
-    const convertDateToDDMMYYYY = (dateString) => {
-        const date = new Date(dateString);
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
+    const uploadToPinata = async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const res = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+        });
+
+        const result = await res.json();
+        console.log("result", result)
+        if (!result) throw new Error('Upload failed');
+
+        return `ipfs://${result}`;
     };
 
-    const uploadToLighthouse = async (file) => {
-        try {
-            setCurrentStep('Uploading invoice to Lighthouse...');
-            
-            // Upload file to Lighthouse
-            const output = await lighthouse.upload([file], process.env.NEXT_LIGHTHOUSE_API_KEY);
-            
-            if (!output || !output.data || !output.data.Hash) {
-                throw new Error('Failed to get IPFS hash from Lighthouse');
-            }
-
-            const ipfsHash = output.data.Hash;
-            const ipfsUri = `ipfs://${ipfsHash}`;
-            
-            console.log('File uploaded to Lighthouse:', ipfsUri);
-            return ipfsUri;
-        } catch (error) {
-            console.error('Lighthouse upload error:', error);
-            throw new Error(`Failed to upload to Lighthouse: ${error.message}`);
-        }
-    };
 
     const calculateRiskScore = async () => {
         try {
             setCurrentStep('Calculating risk score...');
-            
-            const formattedDate = convertDateToDDMMYYYY(dueDate);
-            
-            const response = await fetch('/api/risk/check', {
+                        
+            const response = await fetch('/api/risk-check', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -133,7 +117,7 @@ export default function CreateInvoiceForm() {
                     country: country,
                     amount: parseFloat(faceValue),
                     industry: industry,
-                    date: formattedDate
+                    date: dueDate
                 })
             });
 
@@ -148,7 +132,7 @@ export default function CreateInvoiceForm() {
             return {
                 riskScore: data.risk_score,
                 riskLevel: data.risk_level,
-                message: data.message
+                message: data.details
             };
         } catch (error) {
             console.error('Risk calculation error:', error);
@@ -228,15 +212,16 @@ export default function CreateInvoiceForm() {
             // Step 1: Calculate Risk Score
             const riskData = await calculateRiskScore();
             
-            // Step 2: Upload to Lighthouse
-            const tokenURI = await uploadToLighthouse(invoiceFile);
+            // Step 2: Upload to Pinata
+            const tokenURI = await uploadToPinata(invoiceFile);
+            console.log("tokenuri", tokenURI)
             
             // Step 3: Create Invoice on Blockchain
-            const invoiceResult = await createInvoiceOnChain(tokenURI, riskData.riskScore);
+            const invoiceResult = await createInvoiceOnChain(tokenURI, riskData.riskcore);
             
             // Success!
             setSuccess(
-                `✅ Invoice created successfully!\nTransaction: ${invoiceResult.transactionHash}\nToken ID: ${invoiceResult.tokenId}\nRisk Score: ${riskData.riskScore} (${riskData.riskLevel})\n${riskData.riskScore <= 40 ? 'Your invoice has been automatically listed!' : 'Your invoice needs manual review.'}`
+                `✅ Invoice created successfully!\nTransaction: ${invoiceResult.transactionHash}\nToken ID: ${invoiceResult.tokenId}\nRisk Score: ${riskData.riskScore} (${riskData.riskLevel})\n${int(riskData.riskScore) <= 40 ? 'Your invoice has been automatically listed!' : 'Your invoice needs manual review.'}`
             );
             
             // Reset form
@@ -436,7 +421,7 @@ export default function CreateInvoiceForm() {
                 <ol className="text-xs text-gray-600 space-y-1 list-decimal list-inside">
                     <li>Your wallet and invoice details are verified</li>
                     <li>Risk score is calculated based on your profile and invoice</li>
-                    <li>Invoice document is encrypted and uploaded to IPFS via Lighthouse</li>
+                    <li>Invoice document is encrypted and uploaded to IPFS via Pinata</li>
                     <li>Invoice is created on the blockchain as an ERC-1155 token</li>
                     <li>If risk score ≤ 40, invoice is automatically listed for funding</li>
                     <li>If risk score &gt; 40, admin will review before listing</li>

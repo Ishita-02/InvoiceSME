@@ -15,7 +15,6 @@ export async function POST(req) {
 
     console.log("Verifying proof with:", { app_id, action });
 
-    // Use the official World ID SDK helper function
     const verifyRes = (await verifyCloudProof(
       proof,
       app_id,
@@ -23,14 +22,11 @@ export async function POST(req) {
       signal
     )) ;
 
-    if (verifyRes.success) {
-      // The proof was successfully verified
+    if (verifyRes.success || verifyRes.detail == "This person has already verified for this action."
+    ) {
       console.log("Verification successful (backend):", verifyRes);
       
       const { nullifier_hash } = proof;
-      
-      // TODO: Store nullifier_hash in your database to track unique users
-      // Example: await db.user.create({ nullifier_hash, verified: true })
       
       return NextResponse.json({ 
         success: true, 

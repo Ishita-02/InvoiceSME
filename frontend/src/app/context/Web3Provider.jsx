@@ -14,6 +14,7 @@ export function Web3Provider({ children }) {
     setAccount(null);
     setError(null);
     localStorage.setItem('wallet_disconnected', 'true');
+    localStorage.removeItem('isWalletConnected'); // ✅ ensure this flag is cleared
     console.log("Wallet disconnected.");
   }, []);
 
@@ -25,6 +26,7 @@ export function Web3Provider({ children }) {
       const acc = await Web3Service.connectWallet();
       if (acc) {
         setAccount(acc);
+        localStorage.setItem("isWalletConnected", "true"); // ✅ store flag for reload persistence
       } else {
         disconnectWallet();
       }
@@ -50,27 +52,34 @@ export function Web3Provider({ children }) {
       const handleChainChanged = () => {
         window.location.reload();
       };
-      
+
       window.ethereum.on('accountsChanged', handleAccountsChanged);
       window.ethereum.on('chainChanged', handleChainChanged);
 
       const checkExistingConnection = async () => {
         const isDisconnected = localStorage.getItem('wallet_disconnected') === 'true';
+        const wasConnected = localStorage.getItem('isWalletConnected') === 'true'; // ✅ new check
+
         if (isDisconnected) {
           setIsLoading(false);
           return;
         }
 
         try {
-          if (await Web3Service.isConnected()) {
+          // ✅ Auto reconnect if previously connected
+          if (wasConnected) {
+            await connectWallet();
+          } else if (await Web3Service.isConnected()) {
             await connectWallet();
           } else {
             setIsLoading(false);
           }
         } catch (e) {
+          console.error("Auto reconnect failed:", e);
           setIsLoading(false);
         }
       };
+
       checkExistingConnection();
 
       return () => {

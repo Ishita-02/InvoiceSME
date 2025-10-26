@@ -78,7 +78,7 @@ contract InvoiceSME is ERC1155, Ownable {
 
     /**
      * @notice Creates a new invoice, minting its fractional shares to the seller.
-     * The URI should point to the encrypted invoice data on Lighthouse/IPFS.
+     * The URI should point to the encrypted invoice data on Pinata/IPFS.
      */
     function createInvoice(
         string memory tokenURI,

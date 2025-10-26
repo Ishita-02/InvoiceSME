@@ -68,13 +68,14 @@ export async function POST(req) {
       days: calculatedDays
     });
 
-    const { risk_score, message } = response.data;
+    const { risk_score, risk_level, details } = response.data;
 
     return NextResponse.json(
       {
         wallet,
         risk_score,
-        message,
+        risk_level,
+        details,
         source: "ASI Agent",
         timestamp: new Date().toISOString(),
       },

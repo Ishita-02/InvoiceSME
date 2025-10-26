@@ -11,7 +11,7 @@ agent = Agent(
     endpoint=["http://localhost:8001/submit"]
 )
 
-@agent.on_rest_post("/risk/check", RiskRequest, RiskResponse)
+@agent.on_rest_post("/risk-check", RiskRequest, RiskResponse)
 async def handle_risk_post(ctx: Context, req: RiskRequest) -> RiskResponse:
     ctx.logger.info(f"Received risk check for: {req}")
     riskRes: RiskResponse = calculate_risk_score(req.wallet_address, req.country, float(req.amount), req.industry, int(req.days))
