@@ -37,3 +37,5 @@ const tokenABI = [
         "type": "function"
       }
     ]
+
+export default tokenABI;

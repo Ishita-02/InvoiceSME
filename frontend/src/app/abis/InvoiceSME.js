@@ -1147,3 +1147,5 @@ const InvoiceSMEABI = [
       "type": "function"
     }
   ]
+
+export default InvoiceSMEABI;

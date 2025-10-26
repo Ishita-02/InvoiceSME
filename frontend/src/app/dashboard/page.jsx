@@ -6,27 +6,7 @@ import HumanVerification from '@/components/HumanVerification'; // ADDED
 import BusinessVerification from '@/components/BusinessVerification'; // ADDED
 import Marketplace from '@/components/Marketplace';
 import CreateInvoiceForm from '@/components/CreateInvoiceForm';
-
-// Mock hook to simulate Privy authentication state
-const useMockAuth = () => {
-    const [user, setUser] = useState({ wallet: null, verified: false });
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        setTimeout(() => {
-            const mockUser = { wallet: "0x123...456", verified: false };
-            if (mockUser) {
-                setUser(mockUser);
-            }
-            setLoading(false);
-        }, 1000);
-    }, []);
-    
-    const login = () => { setLoading(true); setTimeout(() => { setUser({ wallet: "0x123...456", verified: false }); setLoading(false); }, 500); };
-    const logout = () => setUser({ wallet: null, verified: false });
-
-    return { ready: !loading, authenticated: !!user.wallet, user, login, logout };
-};
+import { useWeb3 } from "../context/Web3Provider";
 
 // Simple Tabs component
 const Tabs = ({ activeTab, setActiveTab }) => (
@@ -58,55 +38,60 @@ const Tabs = ({ activeTab, setActiveTab }) => (
 
 
 export default function DashboardPage() {
-    const { ready, authenticated, user } = useMockAuth();
-    // ADDED: State for multi-step verification
+    const { account, connectWallet, isLoading } = useWeb3();
     const [isHumanVerified, setIsHumanVerified] = useState(false);
     const [isBusinessVerified, setIsBusinessVerified] = useState(false);
     const [activeTab, setActiveTab] = useState('marketplace');
 
-    if (!ready) {
+    if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-screen font-sans text-gray-800 bg-[#F9F9F7]">
-                Loading App...
-            </div>
+        <div className="flex items-center justify-center h-screen font-sans text-gray-800 bg-[#F9F9F7]">
+            Loading App...
+        </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-[#F9F9F7] text-gray-800 overflow-x-hidden">
-            <Header />
-            <main className="container mx-auto p-6 mt-6">
-                {!authenticated ? (
-                    <div className="text-center mt-24">
-                        <h1 className="text-3xl font-bold font-sans text-[#1E4D43]">
-                            Welcome to the Marketplace
-                        </h1>
-                        <p className="text-gray-600 mt-2">
-                            Please connect your wallet to get started.
-                        </p>
-                    </div>
-                ) : (
-                    <div>
-                        {!isHumanVerified ? (
-                            <div className="mt-10">
-                                <HumanVerification onVerificationComplete={() => setIsHumanVerified(true)} />
-                            </div>
-                        ) 
-                        // : !isBusinessVerified ? (
-                        //     <BusinessVerification onVerificationComplete={() => setIsBusinessVerified(true)} />
-                        // ) 
-                        : (
-                            <div className="mt-10">
-                                <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
-                                <div className="mt-8">
-                                    {activeTab === 'marketplace' && <Marketplace />}
-                                    {activeTab === 'create' && <CreateInvoiceForm />}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
-            </main>
-        </div>
-    );
+    <div className="min-h-screen bg-[#F9F9F7] text-gray-800 overflow-x-hidden">
+      <Header />
+      <main className="container mx-auto p-6 mt-6">
+        {!account ? (
+          <div className="text-center mt-24">
+            <h1 className="text-3xl font-bold font-sans text-[#1E4D43]">
+              Welcome to the Marketplace
+            </h1>
+            <p className="text-gray-600 mt-2">
+              Please connect your wallet to get started.
+            </p>
+            <button
+              onClick={connectWallet}
+              className="mt-6 bg-[#1E4D43] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#163C34] transition-all"
+            >
+              Connect Wallet
+            </button>
+          </div>
+        ) : (
+          <div>
+            {!isHumanVerified ? (
+              <div className="mt-10">
+                <HumanVerification onVerificationComplete={() => setIsHumanVerified(true)} />
+              </div>
+            )
+            // : !isBusinessVerified ? (
+            //     <BusinessVerification onVerificationComplete={() => setIsBusinessVerified(true)} />
+            // )
+            : (
+              <div className="mt-10">
+                <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
+                <div className="mt-8">
+                  {activeTab === 'marketplace' && <Marketplace />}
+                  {activeTab === 'create' && <CreateInvoiceForm />}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+    </div>
+  );
 }

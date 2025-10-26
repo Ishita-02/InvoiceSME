@@ -1,6 +1,6 @@
 import Web3 from 'web3';
-import InvoiceSMEABI from '@/app/abis/InvoiceSME';
-import tokenABI from '@/app/abis/Token';
+import InvoiceSMEABI from './../../abis/InvoiceSME';
+import tokenABI from './../../abis/Token';
 
 
 class Web3Service {
@@ -34,7 +34,7 @@ class Web3Service {
         });
         
         this.contract = new this.web3.eth.Contract(this.contractABI, this.contractAddress);
-        this.tokenContract = new this.web3.eth.Contract(this.tokenContractABI, this.tokenAddress);
+        this.tokenContract = new this.web3.eth.Contract(this.tokenABI, this.tokenAddress);
         
         return true;
       } catch (error) {
@@ -62,7 +62,7 @@ class Web3Service {
     this.account = accounts[0]; 
 
     this.contract = new this.web3.eth.Contract(this.contractABI, this.contractAddress);
-    this.tokenContract = new this.web3.eth.Contract(this.tokenContractABI, this.tokenAddress);
+    this.tokenContract = new this.web3.eth.Contract(this.tokenABI, this.tokenAddress);
     
     console.log("Web3Service connected to account:", this.account);
     return this.account;

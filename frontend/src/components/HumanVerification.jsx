@@ -89,14 +89,14 @@ export default function HumanVerification({ onVerificationComplete }) {
             </p>
             
             {/* Debug info in development */}
-            {process.env.NODE_ENV === 'development' && (
+            {/* {process.env.NODE_ENV === 'development' && (
                 <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded text-xs">
                     <p className="font-semibold mb-1">Debug Info:</p>
                     <p>App ID: {process.env.NEXT_PUBLIC_WLD_APP_ID?.slice(0, 20)}...</p>
                     <p>Action: verifySmeOwner</p>
                     <p>Level: Orb</p>
                 </div>
-            )}
+            )} */}
         </div>
     );
 }

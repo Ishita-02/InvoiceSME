@@ -23,8 +23,7 @@ const industryOptions = [
   "Energy",
   "Agriculture",
   "Entertainment",
-  "Fashion",
-  "Cryptocurrency"
+  "Fashion"
 ];
 
 
@@ -39,7 +38,7 @@ export default function CreateInvoiceForm() {
     const [error, setError] = useState('');
     const [countries, setCountries] = useState([]);
     const [walletAddress, setWalletAddress] = useState('');
-
+    const [success, setSuccess] = useState(false);
 
     useEffect(() => {
         const fetchCountries = async () => {
@@ -263,11 +262,26 @@ export default function CreateInvoiceForm() {
 
     return (
         <div className="max-w-2xl mx-auto">
-             <h2 className="text-3xl font-bold font-sans">Create a New Invoice</h2>
+            <h2 className="text-3xl font-bold font-sans text-gray-900">Create a New Invoice</h2>
             <p className="text-gray-600 mt-2">Fill out the details below to tokenize your invoice and list it for funding.</p>
             
-            <form onSubmit={handleSubmit} className="mt-8 p-8 border border-gray-200 rounded-lg bg-white shadow-sm space-y-6">
-                {/* Face Value and Discount Value can be in a grid for better layout */}
+            {/* {walletAddress && (
+                <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
+                    <p className="text-sm text-green-800">
+                        <span className="font-semibold">Wallet Connected:</span> {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+                    </p>
+                </div>
+            )} */}
+
+            {!walletAddress && (
+                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                    <p className="text-sm text-yellow-800">
+                        ⚠️ Please connect your wallet to create an invoice
+                    </p>
+                </div>
+            )}
+            
+            <div className="mt-8 p-8 border border-gray-200 rounded-lg bg-white shadow-sm space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label htmlFor="faceValue" className="block text-sm font-medium text-gray-700 font-sans">
@@ -280,8 +294,11 @@ export default function CreateInvoiceForm() {
                             onChange={(e) => setFaceValue(e.target.value)}
                             placeholder="e.g., 50000"
                             required
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#1E4D43] focus:border-[#1E4D43] text-gray-900 placeholder-gray-400" // ADDED text colors
+                            step="0.01"
+                            min="0"
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-400"
                         />
+                        <p className="text-xs text-gray-500 mt-1">The total amount the debtor owes</p>
                     </div>
                     <div>
                         <label htmlFor="discountValue" className="block text-sm font-medium text-gray-700 font-sans">
@@ -294,32 +311,37 @@ export default function CreateInvoiceForm() {
                             onChange={(e) => setDiscountValue(e.target.value)}
                             placeholder="e.g., 48000"
                             required
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#1E4D43] focus:border-[#1E4D43] text-gray-900 placeholder-gray-400" // ADDED text colors
+                            step="0.01"
+                            min="0"
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-400"
                         />
+                        <p className="text-xs text-gray-500 mt-1">
+                            Amount you'll receive now (discount: {faceValue && discountValue ? ((1 - discountValue/faceValue) * 100).toFixed(2) : 0}%)
+                        </p>
                     </div>
                 </div>
 
-                {/* ADDED: Country and Industry Fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label htmlFor="country" className="block text-sm font-medium text-gray-700 font-sans">
                             Country
                         </label>
-                         <select
+                        <select
                             id="country"
                             value={country}
                             onChange={(e) => setCountry(e.target.value)}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-[#1E4D43] focus:border-[#1E4D43] text-gray-900"
-                            >
+                            required
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                        >
                             <option value="">Select a country</option>
                             {countries.map((c) => (
                                 <option key={c.code} value={c.name}>
-                                {c.name} ({c.code})
+                                    {c.name}
                                 </option>
                             ))}
                         </select>
                     </div>
-                     <div>
+                    <div>
                         <label htmlFor="industry" className="block text-sm font-medium text-gray-700 font-sans">
                             Industry
                         </label>
@@ -328,7 +350,7 @@ export default function CreateInvoiceForm() {
                             value={industry}
                             onChange={(e) => setIndustry(e.target.value)}
                             required
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-[#1E4D43] focus:border-[#1E4D43] text-gray-900" // ADDED text color
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                         >
                             <option value="" disabled>Select an industry</option>
                             {industryOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
@@ -336,7 +358,7 @@ export default function CreateInvoiceForm() {
                     </div>
                 </div>
 
-                 <div>
+                <div>
                     <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 font-sans">
                         Invoice Due Date
                     </label>
@@ -346,43 +368,80 @@ export default function CreateInvoiceForm() {
                         value={dueDate}
                         onChange={(e) => setDueDate(e.target.value)}
                         required
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#1E4D43] focus:border-[#1E4D43] text-gray-900" // ADDED text color
+                        min={new Date().toISOString().split('T')[0]}
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                     />
+                    <p className="text-xs text-gray-500 mt-1">When the debtor is expected to pay</p>
                 </div>
 
-                {/* ADDED: File Upload Input */}
                 <div>
-                     <label htmlFor="invoiceFile" className="block text-sm font-medium text-gray-700 font-sans">
+                    <label htmlFor="invoiceFile" className="block text-sm font-medium text-gray-700 font-sans">
                         Upload Invoice PDF
                     </label>
-                     <input
+                    <input
                         type="file"
                         id="invoiceFile"
                         onChange={handleFileChange}
                         accept="application/pdf"
                         required
-                        className="mt-1 block w-full text-sm text-gray-500
-                                   file:mr-4 file:py-2 file:px-4
-                                   file:rounded-md file:border-0
-                                   file:text-sm file:font-semibold
-                                   file:bg-[#1E4D43]/10 file:text-[#1E4D43]
-                                   hover:file:bg-[#1E4D43]/20"
+                        className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Upload the invoice document. This will be encrypted and stored securely.</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                        {invoiceFile ? `✓ ${invoiceFile.name}` : 'Upload the invoice document. This will be encrypted and stored securely on IPFS.'}
+                    </p>
                 </div>
 
-                {error && <p className="text-sm text-red-600 text-center">{error}</p>}
+                {isLoading && currentStep && (
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
+                        <div className="flex items-center">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
+                            <p className="text-sm text-blue-800">{currentStep}</p>
+                        </div>
+                    </div>
+                )}
 
-                 <div>
+                {error && (
+                    <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+                        <p className="text-sm text-red-800">{error}</p>
+                    </div>
+                )}
+
+                {success && (
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-md">
+                        <p className="text-sm text-green-800 whitespace-pre-line">{success}</p>
+                    </div>
+                )}
+
+                <div>
                     <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-[#1E4D43] hover:bg-opacity-90 disabled:bg-gray-400 font-sans"
+                        type="button"
+                        onClick={handleSubmit}
+                        disabled={isLoading || !walletAddress}
+                        className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-sans transition-colors"
                     >
-                        {isLoading ? 'Submitting...' : 'Create & List Invoice'}
+                        {isLoading ? (
+                            <span className="flex items-center">
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                                Processing...
+                            </span>
+                        ) : (
+                            'Create & List Invoice'
+                        )}
                     </button>
                 </div>
-            </form>
+            </div>
+
+            <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-md">
+                <h3 className="text-sm font-semibold text-gray-900 mb-2">How it works:</h3>
+                <ol className="text-xs text-gray-600 space-y-1 list-decimal list-inside">
+                    <li>Your wallet and invoice details are verified</li>
+                    <li>Risk score is calculated based on your profile and invoice</li>
+                    <li>Invoice document is encrypted and uploaded to IPFS via Lighthouse</li>
+                    <li>Invoice is created on the blockchain as an ERC-1155 token</li>
+                    <li>If risk score ≤ 40, invoice is automatically listed for funding</li>
+                    <li>If risk score &gt; 40, admin will review before listing</li>
+                </ol>
+            </div>
         </div>
     );
 }
