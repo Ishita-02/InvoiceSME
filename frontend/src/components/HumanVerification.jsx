@@ -1,11 +1,19 @@
 'use client';
 
 import { IDKitWidget, VerificationLevel, ISuccessResult } from '@worldcoin/idkit';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function HumanVerification({ onVerificationComplete }) {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        const isVerified = localStorage.getItem('isHumanVerified');
+        if (isVerified === 'true') {
+            console.log("✅ User already verified from a previous session.");
+            onVerificationComplete();
+        }
+    }, [onVerificationComplete]);
 
     const handleProof = async (proof) => {
         setIsLoading(true);
@@ -31,9 +39,11 @@ export default function HumanVerification({ onVerificationComplete }) {
             
             if (response.ok && data.success) {
                 console.log("✅ Backend verification successful");
+                localStorage.setItem('isHumanVerified', 'true');
                 onVerificationComplete();
             } else if(data.detail == "This person has already verified for this action.") {
                 console.log("✅ Backend verification successful");
+                localStorage.setItem('isHumanVerified', 'true');
                 onVerificationComplete();
             }
             else {

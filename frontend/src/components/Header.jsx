@@ -14,8 +14,7 @@ export default function Header() {
         {/* Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
           <a href="#" className="hover:text-[#E59A3B] transition-colors">Marketplace</a>
-          <a href="#" className="hover:text-[#E59A3B] transition-colors">My Portfolio</a>
-          <a href="#" className="hover:text-[#E59A3B] transition-colors">My Invoices</a>
+          <a href="/portfolio" className="hover:text-[#E59A3B] transition-colors">My Portfolio</a>
         </nav>
 
         {/* Wallet Connect Section */}

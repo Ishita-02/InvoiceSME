@@ -4,7 +4,11 @@ import { useWeb3 } from '../context/Web3Provider';
 import web3Service from '../components/services/Web3Service';
 
 const InvoiceCard = ({ invoice }) => {
-    const fundingProgress = (Math.random() * 80 + 10).toFixed(2);
+    const fundingGoal = parseFloat(invoice.discountValue);
+    const amountFunded = parseFloat(invoice.fundedAmount) || 0;
+
+    const fundingProgress = fundingGoal > 0 ? ((amountFunded / fundingGoal) * 100).toFixed(2) : 0;
+    console.log("funding", fundingProgress, amountFunded, fundingGoal)
 
     return (
         <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">

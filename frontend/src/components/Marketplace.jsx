@@ -3,9 +3,13 @@
 import { useState, useEffect } from "react";
 import { useWeb3 } from '../app/context/Web3Provider'
 import web3Service from '../app/components/services/Web3Service.jsx';
+import InvestmentModal from "@/components/InvestmentModal"; // Import the new modal
 
-const InvoiceCard = ({ invoice }) => {
-    const fundingProgress = (Math.random() * 80 + 10).toFixed(2); 
+const InvoiceCard = ({ invoice, onInvestClick }) => {
+    const fundingGoal = parseFloat(invoice.discountValue);
+    const amountFunded = parseFloat(invoice.fundedAmount) || 0;
+
+    const fundingProgress = fundingGoal > 0 ? ((amountFunded / fundingGoal) * 100).toFixed(2) : 0;
 
     return (
         <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
@@ -41,7 +45,10 @@ const InvoiceCard = ({ invoice }) => {
                 <p className="text-xs text-center mt-2 text-gray-500">{fundingProgress}% Funded</p>
             </div>
 
-            <button className="w-full mt-6 bg-[#1E4D43] text-white font-bold py-2 px-4 rounded-lg hover:bg-opacity-90 transition-all font-sans">
+            <button 
+                onClick={() => onInvestClick(invoice)} // Call the handler on click
+                className="w-full mt-6 bg-[#1E4D43] text-white font-bold py-2 px-4 rounded-lg hover:bg-opacity-90 transition-all font-sans"
+            >
                 Invest Now
             </button>
         </div>
@@ -53,6 +60,7 @@ const Marketplace = () => {
   const { account, isLoading } = useWeb3();
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
 
   useEffect(() => {
     const fetchInvoices = async () => {
@@ -74,6 +82,14 @@ const Marketplace = () => {
     fetchInvoices();
   }, [account]);
 
+  const handleInvestClick = (invoice) => {
+    setSelectedInvoice(invoice);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedInvoice(null);
+  };
+
   if (isLoading || loading) {
     return <div>Loading...</div>;
   }
@@ -83,9 +99,15 @@ const Marketplace = () => {
       <h1 className="text-2xl font-bold mb-4">Marketplace</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
         {invoices.map((invoice) => (
-          <InvoiceCard key={invoice.id} invoice={invoice} />
+          <InvoiceCard key={invoice.id} invoice={invoice} onInvestClick={handleInvestClick}/>
         ))}
       </div>
+      {selectedInvoice && (
+        <InvestmentModal 
+          invoice={selectedInvoice} 
+          onClose={handleCloseModal} 
+        />
+      )}
     </div>
   );
 };
