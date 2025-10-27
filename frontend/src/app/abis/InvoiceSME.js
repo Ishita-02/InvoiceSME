@@ -201,6 +201,31 @@ const InvoiceSMEABI =  [
         {
           "indexed": true,
           "internalType": "address",
+          "name": "investor",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "InvestmentMade",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
           "name": "seller",
           "type": "address"
         },
@@ -215,6 +240,12 @@ const InvoiceSMEABI =  [
           "internalType": "uint256",
           "name": "discountValue",
           "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "tokenURI",
+          "type": "string"
         }
       ],
       "name": "InvoiceCreated",
@@ -524,11 +555,6 @@ const InvoiceSMEABI =  [
     {
       "inputs": [
         {
-          "internalType": "string",
-          "name": "tokenURI",
-          "type": "string"
-        },
-        {
           "internalType": "uint256",
           "name": "faceValue",
           "type": "uint256"
@@ -542,6 +568,16 @@ const InvoiceSMEABI =  [
           "internalType": "uint256",
           "name": "dueDate",
           "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "tokenURI",
+          "type": "string"
         }
       ],
       "name": "createInvoice",
@@ -557,16 +593,6 @@ const InvoiceSMEABI =  [
     },
     {
       "inputs": [
-        {
-          "internalType": "address",
-          "name": "investor",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "seller",
-          "type": "address"
-        },
         {
           "internalType": "uint256",
           "name": "tokenId",
@@ -590,6 +616,11 @@ const InvoiceSMEABI =  [
         {
           "components": [
             {
+              "internalType": "string",
+              "name": "title",
+              "type": "string"
+            },
+            {
               "internalType": "uint256",
               "name": "id",
               "type": "uint256"
@@ -628,6 +659,16 @@ const InvoiceSMEABI =  [
               "internalType": "uint256",
               "name": "repaymentAmount",
               "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "fundedAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "tokenURI",
+              "type": "string"
             }
           ],
           "internalType": "struct InvoiceSME.Invoice[]",
@@ -651,6 +692,11 @@ const InvoiceSMEABI =  [
         {
           "components": [
             {
+              "internalType": "string",
+              "name": "title",
+              "type": "string"
+            },
+            {
               "internalType": "uint256",
               "name": "id",
               "type": "uint256"
@@ -689,6 +735,16 @@ const InvoiceSMEABI =  [
               "internalType": "uint256",
               "name": "repaymentAmount",
               "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "fundedAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "tokenURI",
+              "type": "string"
             }
           ],
           "internalType": "struct InvoiceSME.Invoice",
@@ -712,6 +768,11 @@ const InvoiceSMEABI =  [
         {
           "components": [
             {
+              "internalType": "string",
+              "name": "title",
+              "type": "string"
+            },
+            {
               "internalType": "uint256",
               "name": "id",
               "type": "uint256"
@@ -750,6 +811,16 @@ const InvoiceSMEABI =  [
               "internalType": "uint256",
               "name": "repaymentAmount",
               "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "fundedAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "tokenURI",
+              "type": "string"
             }
           ],
           "internalType": "struct InvoiceSME.Invoice[]",
@@ -773,6 +844,11 @@ const InvoiceSMEABI =  [
         {
           "components": [
             {
+              "internalType": "string",
+              "name": "title",
+              "type": "string"
+            },
+            {
               "internalType": "uint256",
               "name": "id",
               "type": "uint256"
@@ -811,6 +887,16 @@ const InvoiceSMEABI =  [
               "internalType": "uint256",
               "name": "repaymentAmount",
               "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "fundedAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "tokenURI",
+              "type": "string"
             }
           ],
           "internalType": "struct InvoiceSME.Invoice[]",
@@ -831,6 +917,11 @@ const InvoiceSMEABI =  [
       ],
       "name": "invoices",
       "outputs": [
+        {
+          "internalType": "string",
+          "name": "title",
+          "type": "string"
+        },
         {
           "internalType": "uint256",
           "name": "id",
@@ -870,6 +961,16 @@ const InvoiceSMEABI =  [
           "internalType": "uint256",
           "name": "repaymentAmount",
           "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "fundedAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "tokenURI",
+          "type": "string"
         }
       ],
       "stateMutability": "view",

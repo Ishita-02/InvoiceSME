@@ -81,6 +81,18 @@ class Web3Service {
     return this.account;
   }
 
+  isInitialized() {
+    return this.web3 && this.contract && this.account;
+  }
+
+  getContractAddress() {
+    if (this.contract) {
+      return this.contract.options.address;
+    }
+    console.error("Contract not initialized, cannot get address.");
+    return null;
+  }
+
   async approveTokenSpend(amountInWei) {
     if (!this.tokenContract || !this.account) {
       throw new Error("Web3 not initialized. Please connect your wallet.");
@@ -191,7 +203,7 @@ class Web3Service {
    * @param {string} discountValue - Discount value in Wei
    * @param {number} dueDate - Unix timestamp of due date
    */
-  async createInvoice(tokenURI, faceValue, discountValue, dueDate) {
+  async createInvoice(faceValue, discountValue, dueDate, title, tokenURI) {
     if (!this.contract || !this.account) {
       throw new Error("Web3 not initialized. Please connect your wallet.");
     }
@@ -202,7 +214,7 @@ class Web3Service {
       const discountValueWei = this.web3.utils.toWei(discountValue.toString(), 'ether');
 
       const tx = await this.contract.methods
-        .createInvoice(tokenURI, faceValueWei, discountValueWei, dueDate)
+        .createInvoice(faceValueWei, discountValueWei, dueDate, title, tokenURI)
         .send({ from: this.account });
       
       console.log("Invoice created successfully:", tx.transactionHash);
@@ -227,6 +239,7 @@ class Web3Service {
     }
 
     try {
+      console.log(riskScore)
       const tx = await this.contract.methods
         .processVerificationResult(tokenId, riskScore)
         .send({ from: this.account });
@@ -270,7 +283,7 @@ class Web3Service {
    * @param {number} tokenId - Invoice token ID
    * @param {string} amount - Amount in Wei
    */
-  async executeInvestment(investor, seller, tokenId, amount) {
+  async executeInvestment( tokenId, amount) {
     if (!this.contract || !this.account) {
       throw new Error("Web3 not initialized. Please connect your wallet.");
     }
@@ -281,13 +294,36 @@ class Web3Service {
 
       // Execute investment
       const tx = await this.contract.methods
-        .executeInvestment(investor, seller, tokenId, amount)
+        .executeInvestment( tokenId, amount)
         .send({ from: this.account });
       
       console.log("Investment executed:", tx.transactionHash);
       return tx.transactionHash;
     } catch (error) {
       console.error("Error executing investment:", error);
+      throw error;
+    }
+  }
+
+  async approveMarketplace() {
+    if (!this.contract || !this.account) {
+      throw new Error("Web3 not initialized. Please connect your wallet.");
+    }
+    
+    try {
+      // The operator is the address of our own smart contract
+      const operatorAddress = this.contract.options.address;
+      
+      console.log(`Approving marketplace contract (${operatorAddress}) for all tokens...`);
+
+      const tx = await this.contract.methods
+        .setApprovalForAll(operatorAddress, true)
+        .send({ from: this.account });
+
+      console.log("Marketplace approved successfully:", tx.transactionHash);
+      return tx;
+    } catch (error) {
+      console.error("Error approving marketplace:", error);
       throw error;
     }
   }
@@ -572,12 +608,9 @@ class Web3Service {
       statusCode: Number(invoice.status),
       riskScore: Number(invoice.riskScore),
       repaymentAmount: this.web3.utils.fromWei(invoice.repaymentAmount.toString(), 'ether'),
-      // Calculate yield
-      yield: invoice.repaymentAmount > 0 
-        ? ((Number(this.web3.utils.fromWei(invoice.repaymentAmount.toString(), 'ether')) - 
-            Number(this.web3.utils.fromWei(invoice.faceValue.toString(), 'ether'))) / 
-           Number(this.web3.utils.fromWei(invoice.faceValue.toString(), 'ether')) * 100).toFixed(2)
-        : 0
+      title: invoice.title,
+      fundedAmount: this.web3.utils.fromWei(invoice.fundedAmount.toString(), 'ether'),
+      tokenURI: invoice.tokenURI
     };
   }
 

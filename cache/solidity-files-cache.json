@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/ishitaagarwal02/Documents/GitHub/InvoiceSME1/contracts/InvoiceSME.sol": {
-      "lastModificationDate": 1761488301313,
-      "contentHash": "f0bab97037941e5f4fcfabfc39535d5c",
+      "lastModificationDate": 1761555325798,
+      "contentHash": "99a5caa594f65b027a78d4577750481c",
       "sourceName": "contracts/InvoiceSME.sol",
       "solcConfig": {
         "version": "0.8.24",

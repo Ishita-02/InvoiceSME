@@ -38,6 +38,8 @@ export default function CreateInvoiceForm() {
     const [walletAddress, setWalletAddress] = useState('');
     const [currentStep, setCurrentStep] = useState('');
     const [success, setSuccess] = useState(false);
+    const [title, setTitle] = useState('');
+    const [needsApproval, setNeedsApproval] = useState(false);
 
     useEffect(() => {
         const fetchCountries = async () => {
@@ -62,6 +64,32 @@ export default function CreateInvoiceForm() {
         fetchCountries();
         checkWalletConnection();
     }, []);
+
+    const handleApprove = async () => {
+        setIsLoading(true);
+        setCurrentStep('Requesting permission to list your invoice shares...');
+        setError('');
+        try {
+            await web3Service.approveMarketplace();
+            setNeedsApproval(false); // Hide the button after success
+            alert('Marketplace approved! You can now create your invoice.');
+        } catch (err) {
+            setError('Approval failed. Please try again.');
+        } finally {
+            setIsLoading(false);
+            setCurrentStep('');
+        }
+    };
+
+    useEffect(() => {
+        const checkApproval = async () => {
+            if (walletAddress && web3Service.isInitialized()) {
+                const isApproved = await web3Service.isApprovedForAll(walletAddress, web3Service.getContractAddress());
+                setNeedsApproval(!isApproved);
+            }
+        };
+        checkApproval();
+    }, [walletAddress]);
 
     const checkWalletConnection = async () => {
         try {
@@ -149,10 +177,11 @@ export default function CreateInvoiceForm() {
             
             // Create invoice on smart contract
             const result = await web3Service.createInvoice(
-                tokenURI,
                 faceValue,
                 discountValue,
-                dueDateTimestamp
+                dueDateTimestamp,
+                title,
+                tokenURI
             );
             
             console.log('Invoice created on-chain:', result);
@@ -217,11 +246,12 @@ export default function CreateInvoiceForm() {
             console.log("tokenuri", tokenURI)
             
             // Step 3: Create Invoice on Blockchain
-            const invoiceResult = await createInvoiceOnChain(tokenURI, riskData.riskcore);
+            const invoiceResult = await createInvoiceOnChain(tokenURI, riskData.riskScore);
+            console.log("result", invoiceResult)
             
             // Success!
             setSuccess(
-                `✅ Invoice created successfully!\nTransaction: ${invoiceResult.transactionHash}\nToken ID: ${invoiceResult.tokenId}\nRisk Score: ${riskData.riskScore} (${riskData.riskLevel})\n${int(riskData.riskScore) <= 40 ? 'Your invoice has been automatically listed!' : 'Your invoice needs manual review.'}`
+                `✅ Invoice created successfully!\nTransaction: ${invoiceResult.transactionHash}\nToken ID: ${invoiceResult.tokenId}\nRisk Score: ${riskData.riskScore} (${riskData.riskLevel})\n${riskData.riskScore <= 40 ? 'Your invoice has been automatically listed!' : 'Your invoice needs manual review.'}`
             );
             
             // Reset form
@@ -231,6 +261,7 @@ export default function CreateInvoiceForm() {
             setInvoiceFile(null);
             setIndustry('');
             setCountry('India');
+            setTitle('');
             
             // Clear file input
             const fileInput = document.getElementById('invoiceFile');
@@ -268,6 +299,21 @@ export default function CreateInvoiceForm() {
             
             <div className="mt-8 p-8 border border-gray-200 rounded-lg bg-white shadow-sm space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label htmlFor="title" className="block text-sm font-medium text-gray-700 font-sans">
+                            Invoice Title
+                        </label>
+                        <input
+                            type="text"
+                            id="title"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            placeholder="e.g., Q4 Services for Acme Corp"
+                            required
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-400"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">A short, descriptive title for your invoice.</p>
+                    </div>
                     <div>
                         <label htmlFor="faceValue" className="block text-sm font-medium text-gray-700 font-sans">
                             Invoice Face Value (USD)
@@ -375,6 +421,23 @@ export default function CreateInvoiceForm() {
                         {invoiceFile ? `✓ ${invoiceFile.name}` : 'Upload the invoice document. This will be encrypted and stored securely on IPFS.'}
                     </p>
                 </div>
+
+                {needsApproval && (
+                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-md">
+                        <h3 className="font-bold text-amber-800">Action Required</h3>
+                        <p className="text-sm text-amber-700 mt-1">
+                            To allow investors to buy your invoice shares, you must first grant the marketplace permission to handle them. This is a one-time transaction.
+                        </p>
+                        <button
+                            type="button"
+                            onClick={handleApprove}
+                            disabled={isLoading}
+                            className="w-full mt-4 flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-amber-600 hover:bg-amber-700 disabled:bg-gray-400"
+                        >
+                            {isLoading ? 'Approving...' : 'Approve Marketplace'}
+                        </button>
+                    </div>
+                )}
 
                 {isLoading && currentStep && (
                     <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">

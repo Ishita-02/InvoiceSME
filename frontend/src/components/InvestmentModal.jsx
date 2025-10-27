@@ -24,8 +24,6 @@ const InvestmentModal = ({ invoice, onClose }) => {
             const amountInWei = web3Service.toWei(amount);
             
             await web3Service.executeInvestment(
-                account,        
-                invoice.seller, 
                 invoice.id,     
                 amountInWei
             );

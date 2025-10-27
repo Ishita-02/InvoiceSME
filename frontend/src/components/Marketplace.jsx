@@ -11,16 +11,20 @@ const InvoiceCard = ({ invoice, onInvestClick }) => {
 
     const fundingProgress = fundingGoal > 0 ? ((amountFunded / fundingGoal) * 100).toFixed(2) : 0;
 
+    const isFullyFunded = fundingProgress >= 100;
+
     return (
         <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start gap-4">
                 <div className="flex-grow">
                     <h3 className="font-bold text-lg font-sans text-[#1E4D43]">Invoice #{invoice.id}</h3>
-                    {/* Full seller address with word break */}
                     <p className="text-xs text-gray-500 mt-1 break-all">Seller: {invoice.seller}</p>
                 </div>
-                {/* Status badge that won't shrink */}
-                <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full flex-shrink-0">{invoice.status}</span>
+                <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full flex-shrink-0 ${
+                    isFullyFunded ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+                }`}>
+                    {isFullyFunded ? 'Funded' : invoice.status}
+                </span>
             </div>
 
             <div className="mt-6s space-y-4">
@@ -46,10 +50,15 @@ const InvoiceCard = ({ invoice, onInvestClick }) => {
             </div>
 
             <button 
-                onClick={() => onInvestClick(invoice)} // Call the handler on click
-                className="w-full mt-6 bg-[#1E4D43] text-white font-bold py-2 px-4 rounded-lg hover:bg-opacity-90 transition-all font-sans"
+                onClick={() => onInvestClick(invoice)}
+                disabled={isFullyFunded}
+                className={`w-full mt-6 text-white font-bold py-2 px-4 rounded-lg transition-all font-sans ${
+                    isFullyFunded
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-[#1E4D43] hover:bg-opacity-90'
+                }`}
             >
-                Invest Now
+                {isFullyFunded ? 'Fully Funded' : 'Invest Now'}
             </button>
         </div>
     );
