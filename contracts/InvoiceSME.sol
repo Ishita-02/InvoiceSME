@@ -140,7 +140,7 @@ contract InvoiceSME is ERC1155, Ownable {
         require(invoice.fundedAmount + amount <= invoice.discountValue, "Investment exceeds funding goal");
 
         pyusdToken.transferFrom(investor, seller, amount);
-        safeTransferFrom(seller, investor, tokenId, amount, "");
+        _safeTransferFrom(seller, investor, tokenId, amount, "");
         invoice.fundedAmount += amount;
 
         _trackInvestor(investor, tokenId);
@@ -152,12 +152,21 @@ contract InvoiceSME is ERC1155, Ownable {
         }
     }
 
-    function repayInvoice(uint256 tokenId, uint256 totalRepaymentAmount) external onlyOwner {
+    /**
+     * @notice Allows the original SELLER to repay the invoice after receiving off-chain funds from the debtor.
+     * @dev The seller must first approve the contract to spend their PYUSD tokens.
+     */
+    function repayInvoice(uint256 tokenId) external { 
         Invoice storage invoice = invoices[tokenId];
+        uint256 totalRepaymentAmount = invoice.faceValue;
+        
+        // NEW: Check if the person calling this function is the original seller of the invoice
+        require(_msgSender() == invoice.seller, "Only the original seller can repay this invoice");
+        
         require(invoice.status == InvoiceStatus.Funded, "Invoice not funded");
-        require(totalRepaymentAmount >= invoice.faceValue, "Repayment must be at least face value");
 
         pyusdToken.transferFrom(_msgSender(), address(this), totalRepaymentAmount);
+
         invoice.status = InvoiceStatus.Repaid;
         invoice.repaymentAmount = totalRepaymentAmount;
         emit InvoiceRepaid(tokenId, totalRepaymentAmount);

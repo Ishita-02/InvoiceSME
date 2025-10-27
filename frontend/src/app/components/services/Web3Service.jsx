@@ -401,7 +401,6 @@ class Web3Service {
   /**
    * Repay an invoice (Owner only)
    * @param {number} tokenId - Invoice token ID
-   * @param {string} totalRepaymentAmount - Repayment amount in Wei
    */
   async repayInvoice(tokenId, totalRepaymentAmount) {
     if (!this.contract || !this.account) {
@@ -414,7 +413,7 @@ class Web3Service {
 
       // Repay invoice
       const tx = await this.contract.methods
-        .repayInvoice(tokenId, totalRepaymentAmount)
+        .repayInvoice(tokenId)
         .send({ from: this.account });
       
       console.log("Invoice repaid:", tx.transactionHash);

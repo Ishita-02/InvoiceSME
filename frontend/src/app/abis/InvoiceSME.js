@@ -1,4 +1,4 @@
-const InvoiceSMEABI =  [
+const InvoiceSMEABI =   [
     {
       "inputs": [
         {

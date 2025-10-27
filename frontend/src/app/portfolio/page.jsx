@@ -8,7 +8,25 @@ const InvoiceCard = ({ invoice }) => {
     const amountFunded = parseFloat(invoice.fundedAmount) || 0;
 
     const fundingProgress = fundingGoal > 0 ? ((amountFunded / fundingGoal) * 100).toFixed(2) : 0;
+    const isFullyFunded = fundingProgress >= 100;
+
     console.log("funding", fundingProgress, amountFunded, fundingGoal)
+
+    const handleRepay = async () => {
+        const confirmation = confirm(`You are about to repay Invoice #${invoice.id} with ${invoice.faceValue} PYUSD. This will transfer funds from your wallet to the contract for investors to claim. Continue?`);
+        
+        if (confirmation) {
+            try {
+               
+                const amountInWei = web3Service.toWei(invoice.faceValue);
+                await web3Service.repayInvoice(invoice.id, amountInWei);
+                alert("Invoice successfully marked as repaid!");
+            } catch (error) {
+                console.error("Repayment failed:", error);
+                alert(`Repayment failed: ${error.message}`);
+            }
+        }
+    };
 
     return (
         <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
@@ -43,9 +61,23 @@ const InvoiceCard = ({ invoice }) => {
                     <p className="text-xs text-center mt-2 text-gray-500">{fundingProgress}% Funded</p>
                 </div>
             </div>
-            <button className="w-full mt-6 bg-[#1E4D43] text-white font-bold py-2 px-4 rounded-lg hover:bg-opacity-90 transition-all font-sans">
-                View Details
-            </button>
+            {isFullyFunded && invoice.status === 'Funded' ? (
+                <button 
+                    onClick={handleRepay}
+                    className="w-full mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-all font-sans"
+                >
+                    Repay Invoice
+                </button>
+            ) : (
+                <button 
+                    // This can be an Invest Now button or a simple details button
+                    // For simplicity, we'll keep it as a generic button
+                    onClick={() => console.log("Viewing details for invoice:", invoice.id)}
+                    className="w-full mt-6 bg-[#1E4D43] text-white font-bold py-2 px-4 rounded-lg hover:bg-opacity-90 transition-all font-sans"
+                >
+                    View Details
+                </button>
+            )}
         </div>
     );
 };

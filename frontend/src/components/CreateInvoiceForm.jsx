@@ -39,7 +39,6 @@ export default function CreateInvoiceForm() {
     const [currentStep, setCurrentStep] = useState('');
     const [success, setSuccess] = useState(false);
     const [title, setTitle] = useState('');
-    const [needsApproval, setNeedsApproval] = useState(false);
 
     useEffect(() => {
         const fetchCountries = async () => {
@@ -64,32 +63,6 @@ export default function CreateInvoiceForm() {
         fetchCountries();
         checkWalletConnection();
     }, []);
-
-    const handleApprove = async () => {
-        setIsLoading(true);
-        setCurrentStep('Requesting permission to list your invoice shares...');
-        setError('');
-        try {
-            await web3Service.approveMarketplace();
-            setNeedsApproval(false); // Hide the button after success
-            alert('Marketplace approved! You can now create your invoice.');
-        } catch (err) {
-            setError('Approval failed. Please try again.');
-        } finally {
-            setIsLoading(false);
-            setCurrentStep('');
-        }
-    };
-
-    useEffect(() => {
-        const checkApproval = async () => {
-            if (walletAddress && web3Service.isInitialized()) {
-                const isApproved = await web3Service.isApprovedForAll(walletAddress, web3Service.getContractAddress());
-                setNeedsApproval(!isApproved);
-            }
-        };
-        checkApproval();
-    }, [walletAddress]);
 
     const checkWalletConnection = async () => {
         try {
@@ -127,7 +100,7 @@ export default function CreateInvoiceForm() {
         console.log("result", result)
         if (!result) throw new Error('Upload failed');
 
-        return `ipfs://${result}`;
+        return `https://ipfs.io/ipfs://${result}`;
     };
 
 
@@ -276,18 +249,10 @@ export default function CreateInvoiceForm() {
         }
     };
 
-    return (
+   return (
         <div className="max-w-2xl mx-auto">
             <h2 className="text-3xl font-bold font-sans text-gray-900">Create a New Invoice</h2>
             <p className="text-gray-600 mt-2">Fill out the details below to tokenize your invoice and list it for funding.</p>
-            
-            {/* {walletAddress && (
-                <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
-                    <p className="text-sm text-green-800">
-                        <span className="font-semibold">Wallet Connected:</span> {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
-                    </p>
-                </div>
-            )} */}
 
             {!walletAddress && (
                 <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
@@ -296,8 +261,11 @@ export default function CreateInvoiceForm() {
                     </p>
                 </div>
             )}
-            
-            <div className="mt-8 p-8 border border-gray-200 rounded-lg bg-white shadow-sm space-y-6">
+
+            <form 
+                onSubmit={handleSubmit}
+                className={`mt-8 p-8 border border-gray-200 rounded-lg bg-white shadow-sm space-y-6 `}
+            >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label htmlFor="title" className="block text-sm font-medium text-gray-700 font-sans">
@@ -347,7 +315,7 @@ export default function CreateInvoiceForm() {
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-400"
                         />
                         <p className="text-xs text-gray-500 mt-1">
-                            Amount you'll receive now (discount: {faceValue && discountValue ? ((1 - discountValue/faceValue) * 100).toFixed(2) : 0}%)
+                            Amount you'll receive now (discount: {faceValue && discountValue ? ((1 - discountValue / faceValue) * 100).toFixed(2) : 0}%)
                         </p>
                     </div>
                 </div>
@@ -422,23 +390,6 @@ export default function CreateInvoiceForm() {
                     </p>
                 </div>
 
-                {needsApproval && (
-                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-md">
-                        <h3 className="font-bold text-amber-800">Action Required</h3>
-                        <p className="text-sm text-amber-700 mt-1">
-                            To allow investors to buy your invoice shares, you must first grant the marketplace permission to handle them. This is a one-time transaction.
-                        </p>
-                        <button
-                            type="button"
-                            onClick={handleApprove}
-                            disabled={isLoading}
-                            className="w-full mt-4 flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-amber-600 hover:bg-amber-700 disabled:bg-gray-400"
-                        >
-                            {isLoading ? 'Approving...' : 'Approve Marketplace'}
-                        </button>
-                    </div>
-                )}
-
                 {isLoading && currentStep && (
                     <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
                         <div className="flex items-center">
@@ -460,24 +411,15 @@ export default function CreateInvoiceForm() {
                     </div>
                 )}
 
-                <div>
-                    <button
-                        type="button"
-                        onClick={handleSubmit}
-                        disabled={isLoading || !walletAddress}
-                        className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-sans transition-colors"
-                    >
-                        {isLoading ? (
-                            <span className="flex items-center">
-                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                                Processing...
-                            </span>
-                        ) : (
-                            'Create & List Invoice'
-                        )}
-                    </button>
-                </div>
-            </div>
+                <button
+                    type="submit"
+                    disabled={isLoading }
+                    className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                >
+                    {isLoading ? currentStep || 'Processing...' : 
+                     'Create Invoice'}
+                </button>
+            </form>
 
             <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-md">
                 <h3 className="text-sm font-semibold text-gray-900 mb-2">How it works:</h3>
@@ -487,7 +429,7 @@ export default function CreateInvoiceForm() {
                     <li>Invoice document is encrypted and uploaded to IPFS via Pinata</li>
                     <li>Invoice is created on the blockchain as an ERC-1155 token</li>
                     <li>If risk score ≤ 40, invoice is automatically listed for funding</li>
-                    <li>If risk score &gt; 40, admin will review before listing</li>
+                    <li>If risk score {'>'} 40, admin will review before listing</li>
                 </ol>
             </div>
         </div>
