@@ -712,7 +712,18 @@ class Web3Service {
       })
       .on('error', console.error);
   }
-  
+
+  async getInvoicesForManualReview() {
+    const allInvoices = await this.getAllInvoices();
+    return allInvoices.filter(invoice => invoice.status === 'ManualReview');
+  }
+
+  async getOwner() {
+    if (!this.contract) {
+      throw new Error("Contract not initialized.");
+    }
+    return this.contract.methods.owner().call();
+  }
 
 }
 
