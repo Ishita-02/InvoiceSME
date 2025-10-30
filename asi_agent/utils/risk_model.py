@@ -4,11 +4,14 @@ import os
 from datetime import datetime
 from web3 import Web3
 
-SEPOLIA_RPC_URL = "https://eth-sepolia.g.alchemy.com/v2/AqK-lMhLej1xV4uOTUDOKt724_JJsrwb"
+alchemy_key = os.getenv("SEPOLIA_RPC_URL_ALCHEMY_KEY")
+etherscan_api_key = os.getenv("ETHERSCAN_API_KEY")
+
+SEPOLIA_RPC_URL = f'https://eth-sepolia.g.alchemy.com/v2/{alchemy_key}'
 w3 = Web3(Web3.HTTPProvider(SEPOLIA_RPC_URL))
 
 # --- Constants ---
-ETHERSCAN_API_KEY = "NZ5G99S66WE5UJB773744VH517GH2PCBIW"
+ETHERSCAN_API_KEY = f'{etherscan_api_key}'
 EAS_SUBGRAPH_URL = "https://sepolia.easscan.org/graphql"
 
 # Sepolia contract addresses for reputable DeFi protocols

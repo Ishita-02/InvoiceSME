@@ -60,7 +60,23 @@ const InvoiceCard = ({ invoice }) => {
                     <p className="text-xs text-center mt-2 text-gray-500">{fundingProgress}% Funded</p>
                 </div>
             </div>
-            {isFullyFunded && invoice.status === 'Funded' ? (
+            {invoice.status === 'Repaid' ? (
+                <button
+                    onClick={async () => {
+                        try {
+                            await web3Service.claimRepayment(invoice.id);
+                            alert('Repayment claimed successfully!');
+                            window.location.reload(); 
+                        } catch (error) {
+                            console.error("Claim failed:", error);
+                            alert(`Claim failed: ${error.message}`);
+                        }
+                    }}
+                    className="w-full mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-all font-sans"
+                >
+                    Claim Repayment
+                </button>
+            ) : isFullyFunded && invoice.status === 'Funded' ? (
                 <button 
                     onClick={handleRepay}
                     className="w-full mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-all font-sans"
