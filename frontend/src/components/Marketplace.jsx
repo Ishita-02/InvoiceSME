@@ -9,7 +9,7 @@ import StatusBadge from "./StatusBadge";
 const InvoiceCard = ({ invoice, onInvestClick }) => {
     const fundingGoal = parseFloat(invoice.discountValue);
     const amountFunded = parseFloat(invoice.fundedAmount) || 0;
-
+    
     const fundingProgress = fundingGoal > 0 ? ((amountFunded / fundingGoal) * 100).toFixed(2) : 0;
 
     const isFullyFunded = fundingProgress >= 100;
@@ -121,7 +121,7 @@ const Marketplace = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Marketplace</h1>
+      <h1 className="text-2xl font-bold mb-4 text-gray-100">Invoices</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
         {invoices.map((invoice) => (
           <InvoiceCard key={invoice.id} invoice={invoice} onInvestClick={handleInvestClick}/>

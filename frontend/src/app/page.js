@@ -43,7 +43,7 @@ export default function LandingPage() {
           }
       `}</style>
 
-      <section className="relative z-10 container mx-auto px-6 py-32 text-center">
+      <section className="relative z-8 container mx-auto px-6 py-32 text-center">
         <div className="w-20 h-20 bg-[#1E4D43] rounded-2xl flex items-center justify-center mx-auto mb-8"
              style={{ 
                  backgroundColor: '#1E4D43',
@@ -53,7 +53,7 @@ export default function LandingPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
         </div>
-        <h1 className="text-6xl font-bold mb-4" style={{ color: '#FFFFFF' }}>
+        <h1 className="text-5xl font-bold mb-4" style={{ color: '#FFFFFF' }}>
           InvoiceSME
         </h1>
         <p className="text-xl text-slate-200 mb-8" style={{ color: '#E2E8F0' }}>
