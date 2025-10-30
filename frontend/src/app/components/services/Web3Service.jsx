@@ -722,7 +722,9 @@ class Web3Service {
     if (!this.contract) {
       throw new Error("Contract not initialized.");
     }
-    return this.contract.methods.owner().call();
+    const owner = await this.contract.methods.owner().call();
+    console.log("owner", owner)
+    return owner;
   }
 
 }
