@@ -718,6 +718,11 @@ class Web3Service {
     return allInvoices.filter(invoice => invoice.status === 'ManualReview');
   }
 
+  async getActiveInvoices() {
+    const allInvoices = await this.getAllInvoices();
+    return allInvoices.filter(invoice => invoice.status === 'Listed');
+  }
+
   async getOwner() {
     if (!this.contract) {
       throw new Error("Contract not initialized.");

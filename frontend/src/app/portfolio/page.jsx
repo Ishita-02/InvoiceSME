@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useWeb3 } from '../context/Web3Provider';
 import web3Service from '../components/services/Web3Service';
+import StatusBadge from "@/components/StatusBadge";
 
 const InvoiceCard = ({ invoice }) => {
     const fundingGoal = parseFloat(invoice.discountValue);
@@ -9,8 +10,6 @@ const InvoiceCard = ({ invoice }) => {
 
     const fundingProgress = fundingGoal > 0 ? ((amountFunded / fundingGoal) * 100).toFixed(2) : 0;
     const isFullyFunded = fundingProgress >= 100;
-
-    console.log("funding", fundingProgress, amountFunded, fundingGoal)
 
     const handleRepay = async () => {
         const confirmation = confirm(`You are about to repay Invoice #${invoice.id} with ${invoice.faceValue} PYUSD. This will transfer funds from your wallet to the contract for investors to claim. Continue?`);
@@ -36,7 +35,7 @@ const InvoiceCard = ({ invoice }) => {
                         <h3 className="font-bold text-lg font-sans text-[#1E4D43]">Invoice #{invoice.id}</h3>
                         <p className="text-xs text-gray-500 mt-1 break-all">Seller: {invoice.seller}</p>
                     </div>
-                    <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full flex-shrink-0">{invoice.status}</span>
+                    <StatusBadge status={invoice.status} />
                 </div>
 
                 <div className="mt-6 space-y-4">
@@ -70,8 +69,6 @@ const InvoiceCard = ({ invoice }) => {
                 </button>
             ) : (
                 <button 
-                    // This can be an Invest Now button or a simple details button
-                    // For simplicity, we'll keep it as a generic button
                     onClick={() => console.log("Viewing details for invoice:", invoice.id)}
                     className="w-full mt-6 bg-[#1E4D43] text-white font-bold py-2 px-4 rounded-lg hover:bg-opacity-90 transition-all font-sans"
                 >

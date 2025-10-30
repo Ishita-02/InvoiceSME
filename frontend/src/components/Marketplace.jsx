@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useWeb3 } from '../app/context/Web3Provider'
 import web3Service from '../app/components/services/Web3Service.jsx';
-import InvestmentModal from "@/components/InvestmentModal"; // Import the new modal
+import InvestmentModal from "@/components/InvestmentModal"; 
+import StatusBadge from "./StatusBadge";
 
 const InvoiceCard = ({ invoice, onInvestClick }) => {
     const fundingGoal = parseFloat(invoice.discountValue);
@@ -13,6 +14,29 @@ const InvoiceCard = ({ invoice, onInvestClick }) => {
 
     const isFullyFunded = fundingProgress >= 100;
 
+    const getButtonState = () => {
+        const status = isFullyFunded ? 'Funded' : invoice.status;
+
+        switch (status) {
+            case 'Listed':
+                return { text: 'Invest Now', disabled: false, style: 'bg-[#1E4D43] hover:bg-opacity-90' };
+            case 'Funded':
+                return { text: 'Fully Funded', disabled: true, style: 'bg-gray-400 cursor-not-allowed' };
+            case 'ManualReview':
+                return { text: 'In Review', disabled: true, style: 'bg-gray-400 cursor-not-allowed' };
+            case 'Pending':
+                return { text: 'Pending', disabled: true, style: 'bg-gray-400 cursor-not-allowed' };
+            case 'Repaid':
+                return { text: 'Repaid', disabled: true, style: 'bg-gray-400 cursor-not-allowed' };
+            case 'Closed':
+                return { text: 'Closed', disabled: true, style: 'bg-gray-400 cursor-not-allowed' };
+            default:
+                return { text: 'Unavailable', disabled: true, style: 'bg-gray-400 cursor-not-allowed' };
+        }
+    };
+
+    const buttonState = getButtonState();
+
     return (
         <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start gap-4">
@@ -20,11 +44,7 @@ const InvoiceCard = ({ invoice, onInvestClick }) => {
                     <h3 className="font-bold text-lg font-sans text-[#1E4D43]">Invoice #{invoice.id}</h3>
                     <p className="text-xs text-gray-500 mt-1 break-all">Seller: {invoice.seller}</p>
                 </div>
-                <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full flex-shrink-0 ${
-                    isFullyFunded ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
-                }`}>
-                    {isFullyFunded ? 'Funded' : invoice.status}
-                </span>
+                    <StatusBadge status={isFullyFunded ? 'Funded' : invoice.status} />
             </div>
 
             <div className="mt-6s space-y-4">
@@ -51,14 +71,10 @@ const InvoiceCard = ({ invoice, onInvestClick }) => {
 
             <button 
                 onClick={() => onInvestClick(invoice)}
-                disabled={isFullyFunded}
-                className={`w-full mt-6 text-white font-bold py-2 px-4 rounded-lg transition-all font-sans ${
-                    isFullyFunded
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : 'bg-[#1E4D43] hover:bg-opacity-90'
-                }`}
+                disabled={buttonState.disabled}
+                className={`w-full mt-6 text-white font-bold py-2 px-4 rounded-lg transition-all font-sans ${buttonState.style}`}
             >
-                {isFullyFunded ? 'Fully Funded' : 'Invest Now'}
+                {buttonState.text}
             </button>
         </div>
     );

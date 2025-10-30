@@ -8,13 +8,10 @@ import "@openzeppelin/contracts/utils/Context.sol";
 
 /**
  * @title InvoiceSME Marketplace Contract
- * @author Your Name
  * @notice A decentralized marketplace for tokenizing and trading SME invoices using the ERC-1155 standard.
  * Each invoice is represented by a unique token ID, and its shares are the supply of that token.
  */
 contract InvoiceSME is ERC1155, Ownable {
-
-    //=========== STATE VARIABLES ===========
 
     IERC20 public immutable pyusdToken;
     uint256 private _nextTokenId;
@@ -36,16 +33,13 @@ contract InvoiceSME is ERC1155, Ownable {
         uint256 riskScore;
         uint256 repaymentAmount;
         uint256 fundedAmount;
-        string tokenURI; // <-- ADDED: To store the unique URI for each invoice
+        string tokenURI; 
     }
 
-    // Mappings
     mapping(uint256 => Invoice) public invoices;
     mapping(address => bool) public verifiedSellers;
     mapping(address => uint256[]) public userInvestedInvoices;
 
-
-    //=========== EVENTS ===========
 
     event SellerVerified(address indexed seller);
     event InvoiceCreated(uint256 indexed tokenId, address indexed seller, uint256 faceValue, uint256 discountValue, string tokenURI);
@@ -57,13 +51,9 @@ contract InvoiceSME is ERC1155, Ownable {
     event FundsClaimed(uint256 indexed tokenId, address indexed investor, uint256 amountPaid);
 
 
-    //=========== CONSTRUCTOR ===========
-
     constructor(address _pyusdAddress, address initialOwner) ERC1155("") Ownable(initialOwner) { // Base URI is now empty
         pyusdToken = IERC20(_pyusdAddress);
     }
-
-    //=========== SELLER & INVOICE MANAGEMENT ===========
 
     function addVerifiedSeller(address sellerAddress) external onlyOwner {
         verifiedSellers[sellerAddress] = true;
@@ -79,7 +69,7 @@ contract InvoiceSME is ERC1155, Ownable {
         uint256 discountValue,
         uint256 dueDate,
         string memory title,
-        string memory tokenURI // <-- RE-ADDED: Parameter is back
+        string memory tokenURI 
     ) external returns (uint256) {
         require(verifiedSellers[_msgSender()], "Seller not verified");
         require(discountValue < faceValue, "Discount must be less than face value");
@@ -97,7 +87,7 @@ contract InvoiceSME is ERC1155, Ownable {
             riskScore: 0,
             repaymentAmount: 0,
             fundedAmount: 0,
-            tokenURI: tokenURI // <-- ADDED: URI is saved to the struct
+            tokenURI: tokenURI 
         });
 
         _mint(_msgSender(), tokenId, discountValue, "");
@@ -129,8 +119,6 @@ contract InvoiceSME is ERC1155, Ownable {
         emit InvoiceListed(tokenId, invoice.riskScore);
     }
 
-    //=========== INVESTOR WORKFLOW FUNCTIONS ===========
-
     function executeInvestment(uint256 tokenId, uint256 amount) external {
         Invoice storage invoice = invoices[tokenId];
         address seller = invoice.seller;
@@ -160,7 +148,6 @@ contract InvoiceSME is ERC1155, Ownable {
         Invoice storage invoice = invoices[tokenId];
         uint256 totalRepaymentAmount = invoice.faceValue;
         
-        // NEW: Check if the person calling this function is the original seller of the invoice
         require(_msgSender() == invoice.seller, "Only the original seller can repay this invoice");
         
         require(invoice.status == InvoiceStatus.Funded, "Invoice not funded");
@@ -184,8 +171,6 @@ contract InvoiceSME is ERC1155, Ownable {
         pyusdToken.transfer(_msgSender(), payout);
         emit FundsClaimed(tokenId, _msgSender(), payout);
     }
-
-    //=========== UTILITY & VIEW FUNCTIONS ===========
 
     /**
      * @dev OVERRIDDEN: Returns the unique URI for each token.

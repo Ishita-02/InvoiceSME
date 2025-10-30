@@ -5,11 +5,13 @@ import HumanVerification from '@/components/HumanVerification';
 import BusinessVerification from '@/components/BusinessVerification';
 import Marketplace from '@/components/Marketplace';
 import { useWeb3 } from "../context/Web3Provider";
+import web3Service from '../components/services/Web3Service';
 
 export default function DashboardPage() {
     const { account, connectWallet, isLoading } = useWeb3();
     const [isHumanVerified, setIsHumanVerified] = useState(false);
     const [isBusinessVerified, setIsBusinessVerified] = useState(false);
+    const [totalInvoices, setTotalInvoices] = useState(0);
 
     useEffect(() => {
         const humanVerified = localStorage.getItem('isHumanVerified');
@@ -20,7 +22,17 @@ export default function DashboardPage() {
         if (businessVerified === 'true') {
             setIsBusinessVerified(true);
         }
-    }, []);
+        const fetchInvoices = async () => { 
+          if(account) {
+            const numberOfInvoices = await web3Service.getActiveInvoices();
+            console.log(numberOfInvoices)
+            setTotalInvoices(numberOfInvoices.length);
+            }
+          }
+
+        fetchInvoices();
+        
+    }, [account]);
 
     if (isLoading) {
         return (
@@ -212,7 +224,7 @@ export default function DashboardPage() {
                                                 </div>
                                                 <span className="text-sm text-slate-600 font-medium" style={{ color: '#64748B' }}>Active Invoices</span>
                                             </div>
-                                            <p className="text-3xl font-bold text-slate-900 mb-1" style={{ color: '#0F172A' }}>24</p>
+                                            <p className="text-3xl font-bold text-slate-900 mb-1" style={{ color: '#0F172A' }}>{totalInvoices}</p>
                                             <p className="text-sm text-blue-600 font-semibold" style={{ color: '#3B82F6' }}>Live now</p>
                                         </div>
                                         
