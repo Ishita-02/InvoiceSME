@@ -15,6 +15,14 @@ export default function BusinessVerification({ onVerificationComplete }) {
         setSuccessMessage('');
 
         try {
+            const verified = localStorage.getItem('isBusinessVerified');
+
+            if (verified === 'true') {
+                setSuccessMessage('Business already verified.');
+                onVerificationComplete();
+                setIsLoading(false);
+                return;
+            }
             // Call our new backend API route
             const response = await fetch('/api/verify-gst', {
                 method: 'POST',
@@ -30,6 +38,9 @@ export default function BusinessVerification({ onVerificationComplete }) {
 
                 if (businessName) {
                     setSuccessMessage(`Successfully verified: ${businessName}`);
+
+                    localStorage.setItem('isBusinessVerified', 'true');
+                    localStorage.setItem('verifiedBusinessName', businessName);
                     // Call the parent component's function after a short delay
                     setTimeout(() => {
                         onVerificationComplete();
