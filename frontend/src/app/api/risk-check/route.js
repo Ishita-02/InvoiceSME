@@ -60,7 +60,7 @@ export async function POST(req) {
     }
 
 
-    const response = await axios.post(`${ASI_AGENT_URL}/risk/check`, {
+    const response = await axios.post(`${ASI_AGENT_URL}/risk-check`, {
       wallet_address: wallet,
       country: country,
       amount: amount,
