@@ -37,7 +37,7 @@ export async function POST(req) {
     const body = await req.json();
     const { wallet, country, amount, industry, date } = body;
 
-    console.log("wallet", wallet);
+    console.log("wallet", wallet,date);
 
     if (!wallet) {
       return NextResponse.json(

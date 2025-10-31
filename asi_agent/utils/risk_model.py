@@ -1,17 +1,21 @@
 import requests
 import random
 import os
+from dotenv import load_dotenv
 from datetime import datetime
 from web3 import Web3
+
+load_dotenv()
 
 alchemy_key = os.getenv("SEPOLIA_RPC_URL_ALCHEMY_KEY")
 etherscan_api_key = os.getenv("ETHERSCAN_API_KEY")
 
-SEPOLIA_RPC_URL = f'https://eth-sepolia.g.alchemy.com/v2/{alchemy_key}'
+
+SEPOLIA_RPC_URL = f"https://eth-sepolia.g.alchemy.com/v2/{alchemy_key}"
 w3 = Web3(Web3.HTTPProvider(SEPOLIA_RPC_URL))
 
 # --- Constants ---
-ETHERSCAN_API_KEY = f'{etherscan_api_key}'
+ETHERSCAN_API_KEY = f"{etherscan_api_key}"
 EAS_SUBGRAPH_URL = "https://sepolia.easscan.org/graphql"
 
 # Sepolia contract addresses for reputable DeFi protocols

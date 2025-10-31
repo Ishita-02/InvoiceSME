@@ -1,0 +1,6 @@
+name: RiskScoringAgent
+description: Analyzes SME wallets and associated invoices to compute a comprehensive risk score based on multiple financial and behavioral metrics. It helps assess the credibility and reliability of participants within the marketplace ecosystem.
+version: 0.1.0
+entrypoint: agent.py
+requirements:
+  - uagents
