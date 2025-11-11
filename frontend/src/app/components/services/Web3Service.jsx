@@ -52,7 +52,7 @@ class Web3Service {
       throw new Error("No Ethereum provider found. Please install MetaMask.");
     }
     
-    this.web3 = new Web3("https://ethereum-sepolia-rpc.publicnode.com");
+    this.web3 = new Web3(window.ethereum);
     
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     if (accounts.length === 0) {
