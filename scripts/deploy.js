@@ -18,15 +18,15 @@ async function main() {
   // console.log(`Minted 1000 mPYUSD to: ${deployer.address}`);
 
   // --- 3️⃣ Deploy InvoiceSME contract using mock PYUSD ---
-  const InvoiceSME = await hre.ethers.getContractFactory("InvoiceSME");
-  const invoiceSME = await InvoiceSME.deploy("0xCaC524BcA292aaade2DF8A05cC58F0a65B1B3bB9", deployer.address);
-  await invoiceSME.waitForDeployment();
+  // const InvoiceSME = await hre.ethers.getContractFactory("InvoiceSME");
+  // const invoiceSME = await InvoiceSME.deploy("0xCaC524BcA292aaade2DF8A05cC58F0a65B1B3bB9", deployer.address);
+  // await invoiceSME.waitForDeployment();
 
-  const invoiceSMEAddress = await invoiceSME.getAddress();
-  console.log(`InvoiceSME contract deployed to: ${invoiceSMEAddress}`);
+  // const invoiceSMEAddress = await invoiceSME.getAddress();
+  // console.log(`InvoiceSME contract deployed to: ${invoiceSMEAddress}`);
 
   // --- 4️⃣ Add verified seller ---
-  const sellerAddress = "0xdc984157f54f2e186cb6e9082bb998cbe7c44c23";
+  const sellerAddress = "0xfee81a4122f8e8e2f0474733546b6f85685bc21a";
   const addSellerTx = await invoiceSME.addVerifiedSeller(sellerAddress);
   await addSellerTx.wait();
   console.log(`Verified seller added: ${sellerAddress}`);

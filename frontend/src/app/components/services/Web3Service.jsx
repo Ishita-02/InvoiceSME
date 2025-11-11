@@ -210,8 +210,8 @@ class Web3Service {
 
     try {
       // Convert values to Wei if they're in Ether
-      const faceValueWei = this.web3.utils.toWei(faceValue.toString(), 'ether');
-      const discountValueWei = this.web3.utils.toWei(discountValue.toString(), 'ether');
+      const faceValueWei = BigInt(faceValue * 1e6);
+      const discountValueWei = BigInt(discountValue * 1e6);
 
       const tx = await this.contract.methods
         .createInvoice(faceValueWei, discountValueWei, dueDate, title, tokenURI)
@@ -291,6 +291,7 @@ class Web3Service {
     try {
       // First approve token spend
       await this.approveTokenSpend(amount);
+      amount = amount / 1e18;
 
       // Execute investment
       const tx = await this.contract.methods
@@ -546,7 +547,7 @@ class Web3Service {
 
     try {
       const balance = await this.contract.methods.balanceOf(targetAddress, tokenId).call();
-      return this.web3.utils.fromWei(balance, 'ether');
+      return balance * 1e6;
     } catch (error) {
       console.error("Error fetching invoice share balance:", error);
       throw error;
@@ -599,16 +600,16 @@ class Web3Service {
     return {
       id: Number(invoice.id),
       seller: invoice.seller,
-      faceValue: this.web3.utils.fromWei(invoice.faceValue.toString(), 'ether'),
-      discountValue: this.web3.utils.fromWei(invoice.discountValue.toString(), 'ether'),
+      faceValue: BigInt(invoice.faceValue * 1e6),
+      discountValue: BigInt(invoice.discountValue * 1e6),
       dueDate: Number(invoice.dueDate),
       dueDateFormatted: new Date(Number(invoice.dueDate) * 1000).toLocaleDateString(),
       status: statusNames[Number(invoice.status)],
       statusCode: Number(invoice.status),
       riskScore: Number(invoice.riskScore),
-      repaymentAmount: this.web3.utils.fromWei(invoice.repaymentAmount.toString(), 'ether'),
+      repaymentAmount: BigInt(invoice.repaymentAmount * 1e6),
       title: invoice.title,
-      fundedAmount: this.web3.utils.fromWei(invoice.fundedAmount.toString(), 'ether'),
+      fundedAmount: BigInt(invoice.fundedAmount * 1e6),
       tokenURI: invoice.tokenURI
     };
   }
