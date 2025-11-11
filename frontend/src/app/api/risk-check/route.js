@@ -5,7 +5,7 @@ import Web3 from "web3";
 
 dotenv.config();
 
-const ASI_AGENT_URL = "http://localhost:8001";
+const ASI_AGENT_URL = "https://invoicesme.onrender.com";
 
 function calculateDaysUntilDue(date) {
   try {
