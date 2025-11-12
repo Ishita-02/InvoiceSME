@@ -209,8 +209,8 @@ class Web3Service {
     }
 
     try {
-      const faceValueWei = this.web3.utils.toBN(faceValue).mul(this.web3.utils.toBN(10).pow(this.web3.utils.toBN(6)));
-      const discountValueWei = this.web3.utils.toBN(discountValue).mul(this.web3.utils.toBN(10).pow(this.web3.utils.toBN(6)));
+      const faceValueWei = BigInt(Math.floor(parseFloat(faceValue) * 1e6)).toString();
+      const discountValueWei = BigInt(Math.floor(parseFloat(discountValue) * 1e6)).toString();
       
       const tx = await this.contract.methods
         .createInvoice(faceValueWei, discountValueWei, dueDate, title, tokenURI)
