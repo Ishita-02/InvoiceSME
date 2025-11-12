@@ -118,7 +118,7 @@ export default function CreateInvoicePage() {
         console.log("result", result)
         if (!result) throw new Error('Upload failed');
 
-        const link = `https://ipfs.io/ipfs://${result}`;
+        const link = `https://ipfs.io/ipfs/${result}`;
         setIpfsLink(link);
 
         return link;

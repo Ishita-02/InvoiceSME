@@ -598,16 +598,16 @@ class Web3Service {
     return {
       id: Number(invoice.id),
       seller: invoice.seller,
-      faceValue: this.web3.utils.fromWei(invoice.faceValue.toString(), 'ether'),
-      discountValue: this.web3.utils.fromWei(invoice.discountValue.toString(), 'ether'),
+      faceValue: (Number(invoice.faceValue) / 1e6).toFixed(2),
+      discountValue: (Number(invoice.discountValue) / 1e6).toFixed(2),
       dueDate: Number(invoice.dueDate),
       dueDateFormatted: new Date(Number(invoice.dueDate) * 1000).toLocaleDateString(),
       status: statusNames[Number(invoice.status)],
       statusCode: Number(invoice.status),
       riskScore: Number(invoice.riskScore),
-      repaymentAmount: this.web3.utils.fromWei(invoice.repaymentAmount.toString(), 'ether'),
+      repaymentAmount: (Number(invoice.repaymentAmount) / 1e6).toFixed(2),
       title: invoice.title,
-      fundedAmount: this.web3.utils.fromWei(invoice.fundedAmount.toString(), 'ether'),
+      fundedAmount: (Number(invoice.fundedAmount) / 1e6).toFixed(2),
       tokenURI: invoice.tokenURI
     };
   }
