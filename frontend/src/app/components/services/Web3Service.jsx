@@ -209,10 +209,9 @@ class Web3Service {
     }
 
     try {
-      // Convert values to Wei if they're in Ether
-      const faceValueWei = this.web3.utils.toWei(faceValue.toString(), 'ether');
-      const discountValueWei = this.web3.utils.toWei(discountValue.toString(), 'ether');
-
+      const faceValueWei = this.web3.utils.toBN(faceValue).mul(this.web3.utils.toBN(10).pow(this.web3.utils.toBN(6)));
+      const discountValueWei = this.web3.utils.toBN(discountValue).mul(this.web3.utils.toBN(10).pow(this.web3.utils.toBN(6)));
+      
       const tx = await this.contract.methods
         .createInvoice(faceValueWei, discountValueWei, dueDate, title, tokenURI)
         .send({ from: this.account });
