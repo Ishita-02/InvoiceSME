@@ -289,12 +289,11 @@ class Web3Service {
 
     try {
       // First approve token spend
-      const amountWei = (parseFloat(amount) * 1e6).toFixed(0);
-      await this.approveTokenSpend(amountWei);
+      await this.approveTokenSpend(amount);
 
       // Execute investment
       const tx = await this.contract.methods
-        .executeInvestment( tokenId, amountWei)
+        .executeInvestment( tokenId, amount/1000000)
         .send({ from: this.account });
       
       console.log("Investment executed:", tx.transactionHash);
@@ -408,7 +407,7 @@ class Web3Service {
     }
 
     try {
-      const repaymentAmountWei = (parseFloat(totalRepaymentAmount) * 1e6).toFixed(0);
+      const repaymentAmountWei = (parseFloat(totalRepaymentAmount) / 1e6).toFixed(0);
 
       await this.approveTokenSpend(repaymentAmountWei);
 
