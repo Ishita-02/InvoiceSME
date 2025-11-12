@@ -34,6 +34,30 @@ export default function DashboardPage() {
         
     }, [account]);
 
+    useEffect(() => {
+  const verifySeller = async () => {
+    if (isBusinessVerified && account) {
+      try {
+        const isOnChainVerified = await web3Service.isVerifiedSeller(account);
+        console.log(`Seller on-chain verification status: ${isOnChainVerified}`);
+
+        if (!isOnChainVerified) {
+          console.log("Verifying seller on-chain...");
+          await web3Service.addVerifiedSeller(account);
+          console.log(`Seller ${account} successfully verified on-chain`);
+        } else {
+          console.log("Seller already verified on-chain. Skipping transaction.");
+        }
+      } catch (err) {
+        console.error("Error verifying seller:", err);
+      }
+    }
+    };
+
+        verifySeller();
+    }, [isBusinessVerified, account]);
+
+
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-screen font-sans text-gray-800 bg-gradient-to-br from-slate-900 via-slate-800 to-[#1E4D43]"

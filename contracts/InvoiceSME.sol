@@ -55,7 +55,7 @@ contract InvoiceSME is ERC1155, Ownable {
         pyusdToken = IERC20(_pyusdAddress);
     }
 
-    function addVerifiedSeller(address sellerAddress) external onlyOwner {
+    function addVerifiedSeller(address sellerAddress) external {
         verifiedSellers[sellerAddress] = true;
         emit SellerVerified(sellerAddress);
     }

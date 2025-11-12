@@ -12,7 +12,7 @@ class Web3Service {
     this.contractABI = InvoiceSMEABI;
     this.tokenABI = tokenABI;
     
-    this.contractAddress = "0xb908DBbD4d8Af051417746fF518535AC4A5e4328";
+    this.contractAddress = "0xbD0a10dd3fCBCeF37fFfF05A459A8E68554B1303";
     this.tokenAddress = "0xCaC524BcA292aaade2DF8A05cC58F0a65B1B3bB9"
   }
 
@@ -171,7 +171,7 @@ class Web3Service {
    * Checks if an address is a verified seller
    * @param {string} sellerAddress - The address to check
    */
-  async isVerifiedSeller(sellerAddress = null) {
+  async isVerifiedSeller(sellerAddress) {
     if (!this.contract) {
       throw new Error("Contract not initialized.");
     }
@@ -210,8 +210,8 @@ class Web3Service {
 
     try {
       // Convert values to Wei if they're in Ether
-      const faceValueWei = BigInt(faceValue * 1e6);
-      const discountValueWei = BigInt(discountValue * 1e6);
+      const faceValueWei = this.web3.utils.toWei(faceValue.toString(), 'ether');
+      const discountValueWei = this.web3.utils.toWei(discountValue.toString(), 'ether');
 
       const tx = await this.contract.methods
         .createInvoice(faceValueWei, discountValueWei, dueDate, title, tokenURI)
@@ -291,7 +291,6 @@ class Web3Service {
     try {
       // First approve token spend
       await this.approveTokenSpend(amount);
-      amount = amount / 1e18;
 
       // Execute investment
       const tx = await this.contract.methods
@@ -547,7 +546,7 @@ class Web3Service {
 
     try {
       const balance = await this.contract.methods.balanceOf(targetAddress, tokenId).call();
-      return balance * 1e6;
+      return balance;
     } catch (error) {
       console.error("Error fetching invoice share balance:", error);
       throw error;
@@ -600,16 +599,16 @@ class Web3Service {
     return {
       id: Number(invoice.id),
       seller: invoice.seller,
-      faceValue: BigInt(invoice.faceValue * 1e6),
-      discountValue: BigInt(invoice.discountValue * 1e6),
+      faceValue: this.web3.utils.fromWei(invoice.faceValue.toString(), 'ether'),
+      discountValue: this.web3.utils.fromWei(invoice.discountValue.toString(), 'ether'),
       dueDate: Number(invoice.dueDate),
       dueDateFormatted: new Date(Number(invoice.dueDate) * 1000).toLocaleDateString(),
       status: statusNames[Number(invoice.status)],
       statusCode: Number(invoice.status),
       riskScore: Number(invoice.riskScore),
-      repaymentAmount: BigInt(invoice.repaymentAmount * 1e6),
+      repaymentAmount: this.web3.utils.fromWei(invoice.repaymentAmount.toString(), 'ether'),
       title: invoice.title,
-      fundedAmount: BigInt(invoice.fundedAmount * 1e6),
+      fundedAmount: this.web3.utils.fromWei(invoice.fundedAmount.toString(), 'ether'),
       tokenURI: invoice.tokenURI
     };
   }
