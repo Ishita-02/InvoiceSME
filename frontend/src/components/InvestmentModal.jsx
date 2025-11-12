@@ -44,9 +44,8 @@ const InvestmentModal = ({ invoice, onClose }) => {
     }
 
     try {
-      const amountInWei = web3Service.toWei(investAmount);
 
-      await web3Service.executeInvestment(invoice.id, amountInWei);
+      await web3Service.executeInvestment(invoice.id, investAmount);
 
       alert('Investment successful!');
       onClose();

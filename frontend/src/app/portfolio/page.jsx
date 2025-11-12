@@ -17,8 +17,7 @@ const InvoiceCard = ({ invoice }) => {
         if (confirmation) {
             try {
                
-                const amountInWei = web3Service.toWei(invoice.faceValue);
-                await web3Service.repayInvoice(invoice.id, amountInWei);
+                await web3Service.repayInvoice(invoice.id, invoice.faceValue);
                 alert("Invoice successfully marked as repaid!");
             } catch (error) {
                 console.error("Repayment failed:", error);
