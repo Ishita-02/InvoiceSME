@@ -185,14 +185,16 @@ export default function DashboardPage() {
                                     <HumanVerification onVerificationComplete={() => setIsHumanVerified(true)} />
                                 </div>
                             </div>
-                        ) : !isBusinessVerified ? (
+                        ) : 
+                        !isBusinessVerified ? (
                             <div className="mt-10">
                                 <div className="backdrop-blur-md bg-white/90 rounded-3xl p-8 max-w-4xl mx-auto shadow-2xl border border-white/20"
                                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)' }}>
                                     <BusinessVerification onVerificationComplete={() => setIsBusinessVerified(true)} />
                                 </div>
                             </div>
-                        ) : (
+                        ) : 
+                        (
                             <div className="mt-10">
                                 {/* Welcome Header with Stats */}
                                 <div className="backdrop-blur-md bg-white/80 rounded-3xl p-8 mb-8 shadow-xl border border-white/20"

@@ -42,6 +42,10 @@ const InvoiceCard = ({ invoice }) => {
                         <span className="text-gray-600">Funding Goal</span>
                         <span className="font-bold font-sans">{invoice.discountValue} PYUSD</span>
                     </div>
+                    <div className="flex justify-between">
+                        <span className="text-gray-600">Amount Funded</span>
+                        <span className="font-bold font-sans">{invoice.fundedAmount} PYUSD</span>
+                    </div>
                      <div className="flex justify-between">
                         <span className="text-gray-600">Repayment Amount</span>
                         <span className="font-bold font-sans">{invoice.faceValue} PYUSD</span>
@@ -84,7 +88,7 @@ const InvoiceCard = ({ invoice }) => {
                 </button>
             ) : (
                 <button 
-                    onClick={() => console.log("Viewing details for invoice:", invoice.id)}
+                    onClick={() =>  window.open(invoice.tokenURI, "_blank")}
                     className="w-full mt-6 bg-[#1E4D43] text-white font-bold py-2 px-4 rounded-lg hover:bg-opacity-90 transition-all font-sans"
                 >
                     View Details
@@ -126,6 +130,7 @@ const MyPortfolio = () => {
     }, [account, activeTab]);
 
     const invoicesToShow = activeTab === 'myInvoices' ? myInvoices : investedInvoices;
+    console.log("invoices", invoicesToShow)
 
     if (isLoading) {
         return <div>Loading Web3 data...</div>;

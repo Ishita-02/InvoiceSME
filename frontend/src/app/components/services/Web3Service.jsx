@@ -12,7 +12,7 @@ class Web3Service {
     this.contractABI = InvoiceSMEABI;
     this.tokenABI = tokenABI;
     
-    this.contractAddress = "0xbD0a10dd3fCBCeF37fFfF05A459A8E68554B1303";
+    this.contractAddress = "0x055A32765a709DC42680692A687C310066Ef135C";
     this.tokenAddress = "0xCaC524BcA292aaade2DF8A05cC58F0a65B1B3bB9"
   }
 
@@ -405,6 +405,8 @@ class Web3Service {
     if (!this.contract || !this.account) {
       throw new Error("Web3 not initialized. Please connect your wallet.");
     }
+
+    console.log(totalRepaymentAmount)
 
     try {
       const repaymentAmountWei = (parseFloat(totalRepaymentAmount) / 1e6).toFixed(0);

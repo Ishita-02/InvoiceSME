@@ -2,6 +2,8 @@
 pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
+
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
@@ -39,6 +41,7 @@ contract InvoiceSME is ERC1155, Ownable {
     mapping(uint256 => Invoice) public invoices;
     mapping(address => bool) public verifiedSellers;
     mapping(address => uint256[]) public userInvestedInvoices;
+    mapping(uint256 => uint256) public tokenSupply;
 
 
     event SellerVerified(address indexed seller);
@@ -91,6 +94,7 @@ contract InvoiceSME is ERC1155, Ownable {
         });
 
         _mint(_msgSender(), tokenId, discountValue, "");
+        tokenSupply[tokenId] = discountValue;
 
         emit InvoiceCreated(tokenId, _msgSender(), faceValue, discountValue, tokenURI);
         return tokenId;
@@ -168,7 +172,11 @@ contract InvoiceSME is ERC1155, Ownable {
 
         uint256 payout = (investorShares * invoice.repaymentAmount) / invoice.discountValue;
         _burn(_msgSender(), tokenId, investorShares);
+        tokenSupply[tokenId] -= investorShares;
         pyusdToken.transfer(_msgSender(), payout);
+        if(tokenSupply[tokenId] == 0) {
+            invoice.status = InvoiceStatus.Closed;
+        }
         emit FundsClaimed(tokenId, _msgSender(), payout);
     }
 
