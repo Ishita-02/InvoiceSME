@@ -409,7 +409,7 @@ class Web3Service {
     console.log(totalRepaymentAmount)
 
     try {
-      const repaymentAmountWei = (parseFloat(totalRepaymentAmount) / 1e6).toFixed(0);
+      const repaymentAmountWei = (parseFloat(totalRepaymentAmount) * 1e6).toFixed(0);
 
       await this.approveTokenSpend(repaymentAmountWei);
 
